@@ -30,7 +30,7 @@
             "com.seibel.distanthorizons.fabric.FabricMain"
         ],
         "modmenu": [
-            "com.seibel.distanthorizons.fabric.wrappers.config.ModMenuIntegration"
+            $fabric_modmenu_entrypoint
         ]
     },
     
@@ -39,7 +39,8 @@
     ],
     
     "depends": {
-        "fabricloader": "*",
+        "fabricloader": ">=${fabric_loader_version}",
+        "fabric-api": ">=${fabric_api_version}",
         "fabric-api-base": "*",
         "fabric-lifecycle-events-v1": "*",
         "fabric-resource-loader-v0": "*",

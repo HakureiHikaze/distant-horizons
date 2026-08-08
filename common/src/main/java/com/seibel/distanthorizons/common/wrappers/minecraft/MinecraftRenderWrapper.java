@@ -109,7 +109,7 @@ import org.lwjgl.opengl.GL15;
 import net.minecraft.world.level.material.FogType;
 #endif
 
-#if MC_VER >= MC_1_21_5
+#if MC_VER >= MC_1_21_5 && MC_VER < MC_26_3_0
 import com.mojang.blaze3d.opengl.GlTexture;
 #else
 #endif
@@ -117,7 +117,9 @@ import com.mojang.blaze3d.opengl.GlTexture;
 #if MC_VER <= MC_1_21_10
 #else
 import net.minecraft.world.attribute.EnvironmentAttributes;
+#if MC_VER < MC_26_3_0
 import com.mojang.blaze3d.textures.GpuTexture;
+#endif
 #endif
 
 /**
@@ -549,7 +551,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		return -1;
 		#elif MC_VER < MC_1_21_5
 		return this.getRenderTarget().getDepthTextureId();
-		#else
+		#elif MC_VER < MC_26_3_0
 		try
 		{		
 			GlTexture glTexture = (GlTexture) this.getRenderTarget().getDepthTexture();
@@ -572,6 +574,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			}
 			return -1;
 		}
+		#else
+		// 26.3 removed the GL texture id channel; stage 2+ will expose renderpearl texture views
+		return -1;
 		#endif
 	}
 	@Override
@@ -581,7 +586,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		return MC.getFramebuffer().framebufferTexture;
 		#elif MC_VER < MC_1_21_5
 		return this.getRenderTarget().getColorTextureId();
-		#else
+		#elif MC_VER < MC_26_3_0
 		try
 		{
 			GlTexture glTexture = (GlTexture) this.getRenderTarget().getColorTexture();
@@ -603,6 +608,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			}
 			return -1;
 		}
+		#else
+		// 26.3 removed the GL texture id channel; stage 2+ will expose renderpearl texture views
+		return -1;
 		#endif
 	}
 	
@@ -779,8 +787,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		wrapper.setLightmapId(textureId);
 	}
 	
-	#if MC_VER <= MC_1_21_10
-	#else
+	#if MC_VER > MC_1_21_10 && MC_VER < MC_26_3_0
 	public void setLightmapGpuTexture(GpuTexture gpuTexture)
 	{
 		IClientLevelWrapper clientLevel = getLightmapClientLevelWrapper();

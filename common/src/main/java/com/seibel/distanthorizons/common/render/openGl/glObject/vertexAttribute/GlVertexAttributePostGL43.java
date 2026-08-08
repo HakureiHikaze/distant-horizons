@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.vertexAttribute;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.logging.DhLogger;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
@@ -153,3 +155,4 @@ public final class GlVertexAttributePostGL43 extends GlAbstractVertexAttribute
 	}
 	
 }
+#endif

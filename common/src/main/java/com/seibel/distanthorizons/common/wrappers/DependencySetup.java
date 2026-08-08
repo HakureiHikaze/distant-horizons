@@ -21,8 +21,11 @@ package com.seibel.distanthorizons.common.wrappers;
 
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingEngine;
 import com.seibel.distanthorizons.api.interfaces.render.IDhApiCustomRenderObjectFactory;
+#if MC_VER < MC_26_3_0
 import com.seibel.distanthorizons.common.render.blaze.BlazeDhRenderApiDefinition;
 import com.seibel.distanthorizons.common.render.openGl.GlDhRenderApiDefinition;
+#endif
+import com.seibel.distanthorizons.common.render.stub.StubDhRenderApiDefinition;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingApi;
 import com.seibel.distanthorizons.core.render.renderer.GenericRenderObjectFactory;
@@ -109,38 +112,17 @@ public class DependencySetup
 		
 		
 		
-		boolean validApi;
 		AbstractDhRenderApiDefinition renderDefinition;
-		if (renderingApiEnum == EDhApiRenderingEngine.OPEN_GL)
+		try
 		{
-			validApi = true;
-			renderDefinition = new GlDhRenderApiDefinition();
+			renderDefinition = createRenderDefinition(renderingApiEnum);
 		}
-		else if (renderingApiEnum == EDhApiRenderingEngine.BLAZE_3D)
+		catch (IllegalStateException e)
 		{
-			#if MC_VER <= MC_1_21_10
-			validApi = false;
-			renderDefinition = null;
-			#else
-			validApi = true;
-			renderDefinition = new BlazeDhRenderApiDefinition();
-			#endif
-		}
-		else
-		{
-			String message = "No ["+ AbstractDhRenderApiDefinition.class.getSimpleName()+"] concrete implementation found for the value: ["+renderingApiEnum+"].";
-			LOGGER.fatal(message);
-			throw new IllegalStateException(message);
-		}
-		
-		
-		// crash if an invalid API is set
-		if (!validApi)
-		{
-			String message = "The Distant Horizons rendering engine ["+renderDefinition.getEngineName()+"]-["+renderingApiEnum+"] is not supported with this Minecraft config, reverting to ["+ EDhApiRenderingEngine.AUTO+"].";
-			LOGGER.fatal(message);
+			// crash if an invalid API is set, but revert the config to AUTO first
+			LOGGER.fatal(e.getMessage());
 			Config.Client.Advanced.Graphics.Experimental.renderingEngine.set(EDhApiRenderingEngine.AUTO);
-			throw new IllegalStateException(message);
+			throw e;
 		}
 		
 		// crash if the rendering API set doesn't match Minecraft's
@@ -155,6 +137,44 @@ public class DependencySetup
 		
 		renderDefinition.bindRenderers();
 		LOGGER.info("DH Rendering successfully bound to: ["+renderDefinition.getEngineName()+"]...");
+	}
+	
+	/**
+	 * Maps a {@link EDhApiRenderingEngine} to its concrete implementation.
+	 * Kept package-private so it can be unit tested without booting Minecraft.
+	 *
+	 * @throws IllegalStateException if the engine has no concrete implementation
+	 *         or is not supported for the compiled MC version.
+	 */
+	static AbstractDhRenderApiDefinition createRenderDefinition(EDhApiRenderingEngine renderingApiEnum)
+	{
+		AbstractDhRenderApiDefinition renderDefinition;
+		if (renderingApiEnum == EDhApiRenderingEngine.STUB)
+		{
+			renderDefinition = new StubDhRenderApiDefinition();
+		}
+		#if MC_VER < MC_26_3_0
+		else if (renderingApiEnum == EDhApiRenderingEngine.OPEN_GL)
+		{
+			renderDefinition = new GlDhRenderApiDefinition();
+		}
+		else if (renderingApiEnum == EDhApiRenderingEngine.BLAZE_3D)
+		{
+			#if MC_VER <= MC_1_21_10
+			throw new IllegalStateException("The Distant Horizons rendering engine ["+renderingApiEnum.name()+"] is not supported with this Minecraft config, reverting to ["+ EDhApiRenderingEngine.AUTO+"].");
+			#else
+			renderDefinition = new BlazeDhRenderApiDefinition();
+			#endif
+		}
+		#endif
+		else
+		{
+			String message = "No ["+ AbstractDhRenderApiDefinition.class.getSimpleName()+"] concrete implementation found for the value: ["+renderingApiEnum+"].";
+			LOGGER.fatal(message);
+			throw new IllegalStateException(message);
+		}
+		
+		return renderDefinition;
 	}
 	
 	

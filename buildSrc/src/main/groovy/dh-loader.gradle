@@ -86,7 +86,20 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
 }
 
+// Unit tests don't use the preprocessor; javac can't resolve the Manifold
+// compiler plugin on the test processor path, so drop the arg for tests only.
+afterEvaluate {
+    tasks.named('compileTestJava').configure {
+        options.compilerArgs.removeAll(['-Xplugin:Manifold'])
+    }
+}
+
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.java_version as Integer)
+        // HotSpot only: Manifold's JVM access hacks do not work on OpenJ9 (e.g. IBM Semeru 25)
+        vendor = JvmVendorSpec.ADOPTIUM
+    }
     sourceCompatibility = JavaVersion.toVersion(gradle.ext.java_version as Integer)
     targetCompatibility = JavaVersion.toVersion(gradle.ext.java_version as Integer)
     withSourcesJar()
@@ -153,6 +166,23 @@ unimined.minecraft(sourceSets.main, true) {
 
         }
     }
+}
+
+// Unimined's hardcoded merged-jar include list predates MC 26.3 and drops
+// com.mojang.renderpearl (the new GPU abstraction) from the compile classpath.
+if (gradle.ext.minecraft_version.startsWith("26.3")) {
+    def mcCfg = unimined.minecrafts.get(sourceSets.main)
+    def field = null
+    def clazz = mcCfg.getClass()
+    while (clazz != null && field == null) {
+        try { field = clazz.getDeclaredField('includeGlobs') } catch (NoSuchFieldException ignore) { }
+        clazz = clazz.getSuperclass()
+    }
+    if (field == null) throw new GradleException("Cannot find includeGlobs field on MinecraftConfig")
+    field.setAccessible(true)
+    def includeGlobs = new ArrayList<String>(field.get(mcCfg))
+    includeGlobs.add('com/mojang/renderpearl/**')
+    field.set(mcCfg, includeGlobs)
 }
 
 if (isNotCommonProject) {
@@ -529,6 +559,11 @@ if (isNotCommonProject) {
             compatible_minecraft_versions: rootProject.compatible_minecraft_versions,
             compatible_forgemc_versions  : compatible_forgemc_versions,
             java_version                 : rootProject.java_version,
+            fabric_loader_version        : rootProject.fabric_loader_version,
+            fabric_api_version           : rootProject.fabric_api_version,
+            fabric_modmenu_entrypoint    : rootProject.hasProperty('fabric_modmenu_entrypoint')
+                ? rootProject.fabric_modmenu_entrypoint
+                : '"com.seibel.distanthorizons.fabric.wrappers.config.ModMenuIntegration"',
             quilt_contributors           : "{" + quilt_contributors.join(", ") + "}",
             info_git_commit              : rootProject.infoGitBranch,
             info_git_branch              : rootProject.infoGitCommit,

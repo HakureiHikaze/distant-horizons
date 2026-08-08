@@ -2,6 +2,19 @@ plugins {
     id 'dh-loader'
 }
 
+// JUnit for common's standalone unit tests (no Minecraft client required)
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.8.2")
+    testImplementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
+    testImplementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
+}
+
+test {
+    useJUnitPlatform()
+}
+
 // Mojang removed ARM LWJGL natives, which causes CI to fail for 1.12.2. Note: this means we cannot build on ARM CPUs right now.
 configurations.configureEach {
     incoming.beforeResolve {

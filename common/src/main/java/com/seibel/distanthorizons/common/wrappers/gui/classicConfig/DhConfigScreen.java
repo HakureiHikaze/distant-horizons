@@ -72,7 +72,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.Identifier;
 #endif
 
+#if MC_VER < MC_26_3_0
 import org.lwjgl.glfw.GLFW;
+#endif
 #if MC_VER > MC_1_12_2
 import com.mojang.blaze3d.platform.InputConstants;
 #endif
@@ -481,8 +483,11 @@ class DhConfigScreen extends DhScreen
 					
 					#if MC_VER <= MC_1_12_2
 					boolean shiftPressed = GuiScreen.isShiftKeyDown();
-					#else
+					#elif MC_VER < MC_26_3_0
 					boolean shiftPressed = InputConstants.isKeyDown(MC_CLIENT.getGlfwWindowId(), GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(MC_CLIENT.getGlfwWindowId(), GLFW.GLFW_KEY_RIGHT_SHIFT);
+					#else
+					// 26.3 moved to SDL input; shift-cycle re-enabled in a later stage
+					boolean shiftPressed = false;
 					#endif
 					
 					// move forward or backwards depending on if the shift key is pressed

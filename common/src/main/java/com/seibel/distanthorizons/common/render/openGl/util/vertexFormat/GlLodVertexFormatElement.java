@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.util.vertexFormat;
 
+#if MC_VER < MC_26_3_0
+
 import org.lwjgl.opengl.GL33;
 
 /**
@@ -166,3 +168,4 @@ public class GlLodVertexFormatElement
 	}
 	
 }
+#endif

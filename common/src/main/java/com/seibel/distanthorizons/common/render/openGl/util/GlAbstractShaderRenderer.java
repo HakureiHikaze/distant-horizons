@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.util;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.render.openGl.glObject.shader.GlShaderProgram;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
@@ -112,3 +114,4 @@ public abstract class GlAbstractShaderRenderer
 	
 	
 }
+#endif

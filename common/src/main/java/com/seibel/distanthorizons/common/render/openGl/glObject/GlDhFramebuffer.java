@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.glObject;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiFramebuffer;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import org.lwjgl.opengl.GL33;
@@ -92,3 +94,4 @@ public class GlDhFramebuffer implements IDhApiFramebuffer
 	
 	
 }
+#endif

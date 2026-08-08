@@ -521,7 +521,10 @@ public abstract class AbstractModInitializer
 		Config.Common.WorldGenerator.distantGeneratorMode.setMcVersionOverrideValue(EDhApiDistantGeneratorMode.INTERNAL_SERVER);
 		#elif MC_VER <= MC_1_21_10
 		Config.Client.Advanced.Graphics.Experimental.renderingEngine.setMcVersionOverrideValue(EDhApiRenderingEngine.OPEN_GL);
+		#elif MC_VER < MC_26_3_0
 		#else
+		// 26.3 and newer: no render engine has been ported yet, force the no-op Stub engine
+		Config.Client.Advanced.Graphics.Experimental.renderingEngine.setMcVersionOverrideValue(EDhApiRenderingEngine.STUB);
 		#endif
 	}
 	

@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.postProcessing.fog;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.rendering.EDhApiHeightFogDirection;
 import com.seibel.distanthorizons.api.enums.rendering.EDhApiHeightFogMixMode;
 import com.seibel.distanthorizons.api.methods.events.sharedParameterObjects.DhApiFogRenderParam;
@@ -257,3 +259,4 @@ public class GlDhFogShader extends GlAbstractShaderRenderer
 	
 	
 }
+#endif

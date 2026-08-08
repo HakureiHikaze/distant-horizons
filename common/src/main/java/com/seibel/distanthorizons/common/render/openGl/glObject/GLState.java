@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.render.openGl.glObject.enums.GLEnums;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import org.lwjgl.opengl.GL33;
@@ -271,3 +273,4 @@ public class GLState implements AutoCloseable
 	
 	
 }
+#endif

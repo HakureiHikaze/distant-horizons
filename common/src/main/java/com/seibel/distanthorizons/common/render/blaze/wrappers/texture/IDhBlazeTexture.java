@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.blaze.wrappers.texture;
 
+#if MC_VER < MC_26_3_0
+
 #if MC_VER <= MC_1_21_10
 public interface IDhBlazeTexture {}
 #else
@@ -14,4 +16,5 @@ public interface IDhBlazeTexture
 	GpuSampler getTextureSampler();
 	
 }
+#endif
 #endif

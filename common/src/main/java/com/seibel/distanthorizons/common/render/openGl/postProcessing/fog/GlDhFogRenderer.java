@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.postProcessing.fog;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.methods.events.sharedParameterObjects.DhApiFogRenderParam;
 import com.seibel.distanthorizons.common.render.openGl.glObject.GLState;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
@@ -155,3 +157,4 @@ public class GlDhFogRenderer implements IDhFogRenderer
 	
 	
 }
+#endif

@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.util.vertexFormat;
 
+#if MC_VER < MC_26_3_0
+
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
@@ -108,3 +110,4 @@ public class GlLodVertexFormat
 	
 	
 }
+#endif

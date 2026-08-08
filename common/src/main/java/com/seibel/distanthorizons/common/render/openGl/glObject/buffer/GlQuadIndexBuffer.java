@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.buffer;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiGpuUploadMethod;
 import com.seibel.distanthorizons.common.render.openGl.glObject.enums.GLEnums;
 import com.seibel.distanthorizons.core.logging.DhLogger;
@@ -81,3 +83,4 @@ public class GlQuadIndexBuffer extends GLIndexBuffer
 	
 	
 }
+#endif

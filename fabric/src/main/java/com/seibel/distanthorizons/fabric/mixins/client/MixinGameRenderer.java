@@ -19,12 +19,13 @@
 
 package com.seibel.distanthorizons.fabric.mixins.client;
 
-#if MC_VER <= MC_1_21_11
+#if MC_VER <= MC_1_21_11 || MC_VER >= MC_26_3_0
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Entity.class)
-public class MixinGameRenderer {}
+public class MixinGameRenderer
+{ /* rendering hooks disabled on 26.3 until the renderpearl port (stage 2) lands */ }
 
 #else
 import com.mojang.blaze3d.vertex.PoseStack;

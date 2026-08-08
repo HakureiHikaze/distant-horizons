@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.generic;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.objects.render.DhApiRenderableBox;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import com.seibel.distanthorizons.core.logging.DhLogger;
@@ -175,3 +177,4 @@ public class GlGenericObjectVertexContainer implements IDhGenericObjectVertexBuf
 	
 	
 }
+#endif

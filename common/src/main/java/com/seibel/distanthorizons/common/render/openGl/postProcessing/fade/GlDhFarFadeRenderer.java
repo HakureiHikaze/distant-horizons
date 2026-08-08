@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.postProcessing.fade;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.render.openGl.GlDhMetaRenderer;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
@@ -155,3 +157,4 @@ public class GlDhFarFadeRenderer implements IDhFarFadeRenderer
 	
 	
 }
+#endif

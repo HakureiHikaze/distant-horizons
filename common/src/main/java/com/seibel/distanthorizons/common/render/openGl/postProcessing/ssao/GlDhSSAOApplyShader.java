@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.postProcessing.ssao;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.render.openGl.GlDhMetaRenderer;
 import com.seibel.distanthorizons.common.render.openGl.glObject.shader.GlShaderProgram;
 import com.seibel.distanthorizons.common.render.openGl.postProcessing.GlScreenQuad;
@@ -144,3 +146,4 @@ public class GlDhSSAOApplyShader extends GlAbstractShaderRenderer
 	
 	
 }
+#endif

@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.generic;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiGenericObjectShaderProgram;
 import com.seibel.distanthorizons.api.interfaces.render.IDhApiRenderableBoxGroup;
 import com.seibel.distanthorizons.api.methods.events.sharedParameterObjects.DhApiRenderParam;
@@ -229,3 +231,4 @@ public class GlGenericObjectShaderProgram extends GlShaderProgram implements IDh
 	public boolean overrideThisFrame() { return true; }
 	
 }
+#endif

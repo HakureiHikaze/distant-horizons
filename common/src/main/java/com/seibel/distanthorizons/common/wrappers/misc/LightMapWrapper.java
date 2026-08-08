@@ -21,9 +21,13 @@ package com.seibel.distanthorizons.common.wrappers.misc;
 
 #if MC_VER > MC_1_12_2
 import com.mojang.blaze3d.platform.NativeImage;
+#if MC_VER < MC_26_3_0
 import com.seibel.distanthorizons.common.render.blaze.wrappers.texture.BlazeTextureViewWrapper;
 #endif
+#endif
+#if MC_VER < MC_26_3_0
 import com.seibel.distanthorizons.common.render.blaze.wrappers.texture.BlazeTextureViewWrapper;
+#endif
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
@@ -36,9 +40,11 @@ import java.nio.ByteBuffer;
 #else
 #endif
 
-#if MC_VER <= MC_1_21_10
+#if MC_VER < MC_26_3_0 && MC_VER <= MC_1_21_10
 #else
+#if MC_VER < MC_26_3_0
 import com.mojang.blaze3d.textures.GpuTexture;
+#endif
 #endif
 
 public class LightMapWrapper implements ILightMapWrapper
@@ -54,12 +60,16 @@ public class LightMapWrapper implements ILightMapWrapper
 	
 	private int textureId = 0;
 	
-	#if MC_VER <= MC_1_21_10
+	#if MC_VER < MC_26_3_0 && MC_VER <= MC_1_21_10
 	#else
+	#if MC_VER < MC_26_3_0
 	private GpuTexture gpuTexture = null;
 	#endif
+	#endif
 	
+	#if MC_VER < MC_26_3_0
 	private final BlazeTextureViewWrapper lightmapTextureWrapper = new BlazeTextureViewWrapper();
+	#endif
 	
 	
 	//==============//
@@ -122,13 +132,15 @@ public class LightMapWrapper implements ILightMapWrapper
 		this.textureId = minecraftLightmapTextureId;
 	}
 	
-	#if MC_VER <= MC_1_21_10
+	#if MC_VER < MC_26_3_0 && MC_VER <= MC_1_21_10
 	#else
+	#if MC_VER < MC_26_3_0
 	public void setLightmapGpuTexture(GpuTexture gpuTexture)
 	{
 		this.gpuTexture = gpuTexture;
 		this.lightmapTextureWrapper.tryWrap(this.gpuTexture);
 	}
+	#endif
 	#endif
 	
 	
@@ -141,7 +153,9 @@ public class LightMapWrapper implements ILightMapWrapper
 	//==============//
 	//region
 	
+	#if MC_VER < MC_26_3_0
 	public BlazeTextureViewWrapper getTextureViewWrapper() { return this.lightmapTextureWrapper; }
+	#endif
 	
 	public int getOpenGlId() { return this.textureId; }
 	

@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.postProcessing.fade;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.objects.math.DhApiMat4f;
 import com.seibel.distanthorizons.common.render.openGl.GlDhMetaRenderer;
 import com.seibel.distanthorizons.common.render.openGl.glObject.shader.GlShaderProgram;
@@ -174,3 +176,4 @@ public class GlDhFarFadeShader extends GlAbstractShaderRenderer
 	}
 	
 }
+#endif

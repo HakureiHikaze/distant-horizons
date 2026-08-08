@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiGLErrorHandlingMode;
 import com.seibel.distanthorizons.api.enums.config.EDhApiGpuUploadMethod;
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingApi;
@@ -390,3 +392,4 @@ public class GLProxy
 	
 	
 }
+#endif

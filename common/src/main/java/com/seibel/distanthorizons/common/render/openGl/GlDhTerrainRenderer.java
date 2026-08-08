@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.render.openGl.terrain.GlBlockTextureAtlas;
 import com.seibel.distanthorizons.common.render.openGl.terrain.GlDhTerrainShaderProgram;
 import com.seibel.distanthorizons.core.dataObjects.render.bufferBuilding.LodBufferContainer;
@@ -66,3 +68,4 @@ public class GlDhTerrainRenderer implements IDhTerrainRenderer
 	
 	
 }
+#endif

@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.buffer;
 
+#if MC_VER < MC_26_3_0
+
 import org.lwjgl.opengl.GL33;
 
 /**
@@ -54,3 +56,4 @@ public class GLIndexBuffer extends GLBuffer
 	public int getBufferBindingTarget() { return GL33.GL_ELEMENT_ARRAY_BUFFER; }
 	
 }
+#endif

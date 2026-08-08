@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiGpuUploadMethod;
 import com.seibel.distanthorizons.common.render.openGl.glObject.buffer.GLIndexBuffer;
 import com.seibel.distanthorizons.common.render.openGl.glObject.buffer.GLVertexBuffer;
@@ -195,3 +197,4 @@ public class GlDhDebugWireframeRenderer extends AbstractDebugWireframeRenderer
 	
 	
 }
+#endif

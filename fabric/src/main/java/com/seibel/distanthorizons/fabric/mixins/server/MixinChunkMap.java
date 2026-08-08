@@ -1,5 +1,16 @@
 package com.seibel.distanthorizons.fabric.mixins.server;
 
+#if MC_VER >= MC_26_3_0
+import net.minecraft.world.entity.Entity;
+import org.spongepowered.asm.mixin.Mixin;
+
+@Mixin(Entity.class)
+public class MixinChunkMap
+{
+	// ChunkSerializer.write no longer exists in 26.3; re-enable when the serverside save hook is ported
+}
+#else
+
 import com.seibel.distanthorizons.common.commonMixins.MixinChunkMapCommon;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
@@ -33,3 +44,5 @@ public class MixinChunkMap
 	{ MixinChunkMapCommon.onChunkSave(this.level, chunk, ci); }
 	
 }
+
+#endif

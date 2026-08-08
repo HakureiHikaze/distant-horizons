@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.vertexAttribute;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.render.openGl.glObject.GLProxy;
 import org.lwjgl.opengl.GL33;
 
@@ -90,3 +92,4 @@ public abstract class GlAbstractVertexAttribute
 	public abstract void completeAndCheck(int expectedStrideSize);
 	
 }
+#endif

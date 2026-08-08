@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.postProcessing;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiGpuUploadMethod;
 import com.seibel.distanthorizons.common.render.openGl.glObject.buffer.GLVertexBuffer;
 import com.seibel.distanthorizons.common.render.openGl.glObject.vertexAttribute.GlAbstractVertexAttribute;
@@ -116,3 +118,4 @@ public class GlScreenQuad
 	
 	
 }
+#endif

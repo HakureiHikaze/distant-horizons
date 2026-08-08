@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.fabric.wrappers.config;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.wrappers.gui.GetConfigScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
@@ -34,3 +36,13 @@ public class ModMenuIntegration implements ModMenuApi
 	}
 	
 }
+
+#else
+
+/** ModMenu 26.3 integration pending (stage 5); stub keeps the entrypoint resolvable. */
+public class ModMenuIntegration
+{
+	
+}
+
+#endif

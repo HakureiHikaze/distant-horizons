@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.shader;
 
+#if MC_VER < MC_26_3_0
+
 import java.awt.Color;
 import java.nio.FloatBuffer;
 
@@ -248,3 +250,4 @@ public class GlShaderProgram
 	
 	
 }
+#endif

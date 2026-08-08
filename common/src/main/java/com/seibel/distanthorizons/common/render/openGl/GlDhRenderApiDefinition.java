@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingApi;
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingEngine;
 import com.seibel.distanthorizons.common.render.openGl.generic.GlGenericObjectRenderer;
@@ -78,3 +80,4 @@ public class GlDhRenderApiDefinition extends AbstractDhRenderApiDefinition
 	
 	
 }
+#endif

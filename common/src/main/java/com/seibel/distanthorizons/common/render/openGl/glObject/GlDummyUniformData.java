@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.glObject;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.core.dataObjects.render.bufferBuilding.LodBufferContainer;
 import com.seibel.distanthorizons.core.wrapperInterfaces.render.objects.ILodContainerUniformBufferWrapper;
 
@@ -13,3 +15,4 @@ public class GlDummyUniformData implements ILodContainerUniformBufferWrapper
 	@Override public void close() { }
 	
 }
+#endif

@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.generic;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiGpuUploadMethod;
 import com.seibel.distanthorizons.api.enums.rendering.EDhApiBlockMaterial;
 import com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiGenericObjectShaderProgram;
@@ -779,3 +781,4 @@ public class GlGenericObjectRenderer implements IDhGenericRenderer
 	
 	
 }
+#endif

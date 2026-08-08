@@ -80,7 +80,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.HitResult;
 
+#if MC_VER < MC_26_3_0
 import org.lwjgl.glfw.GLFW;
+#endif
 
 /**
  * This handles all events sent to the client,
@@ -300,7 +302,7 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		});
 		#endif
 		
-		#if MC_VER <= MC_1_21_11
+		#if MC_VER <= MC_1_21_11 || MC_VER >= MC_26_3_0
 		#else
 		LevelRenderEvents.AFTER_TRANSLUCENT_TERRAIN.register((LevelRenderContext levelRenderContext) ->
 		{
@@ -384,6 +386,7 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		HashSet<Integer> currentKeyDown = new HashSet<>();
 		
 		// Note: Minecraft's InputConstants are the same as GLFW Key values
+		#if MC_VER < MC_26_3_0
 		for (int keyCode = GLFW.GLFW_KEY_0; keyCode <= GLFW.GLFW_KEY_LAST; keyCode++)
 		{
 			if (InputConstants.isKeyDown(MC.getGlfwWindowId(), keyCode))
@@ -391,6 +394,9 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 				currentKeyDown.add(keyCode);
 			}
 		}
+		#else
+		// 26.3 moved to SDL input; key-state polling re-enabled in a later stage
+		#endif
 		
 		// Diff and trigger events
 		for (int keyCode : currentKeyDown)

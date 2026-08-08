@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.glObject.texture;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL13C;
@@ -60,3 +62,4 @@ public class GlDhDepthTexture
 	
 	
 }
+#endif

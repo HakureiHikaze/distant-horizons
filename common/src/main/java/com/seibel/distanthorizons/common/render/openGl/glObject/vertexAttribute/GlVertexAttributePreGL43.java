@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.vertexAttribute;
 
+#if MC_VER < MC_26_3_0
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -251,3 +253,4 @@ public final class GlVertexAttributePreGL43 extends GlAbstractVertexAttribute
 	}
 	
 }
+#endif

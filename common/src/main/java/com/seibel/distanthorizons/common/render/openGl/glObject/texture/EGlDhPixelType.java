@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.glObject.texture;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.render.openGl.glObject.enums.EGlVersion;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL12C;
@@ -63,3 +65,4 @@ public enum EGlDhPixelType
 	public EGlVersion getMinimumGlVersion() { return minimumGlVersion; }
 	
 }
+#endif

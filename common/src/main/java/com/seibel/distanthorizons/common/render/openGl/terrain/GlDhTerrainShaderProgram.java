@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.terrain;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiShaderProgram;
 import com.seibel.distanthorizons.api.methods.events.abstractEvents.*;
 import com.seibel.distanthorizons.api.methods.events.sharedParameterObjects.DhApiRenderParam;
@@ -433,3 +435,4 @@ public class GlDhTerrainShaderProgram extends GlShaderProgram implements IDhApiS
 	
 	
 }
+#endif

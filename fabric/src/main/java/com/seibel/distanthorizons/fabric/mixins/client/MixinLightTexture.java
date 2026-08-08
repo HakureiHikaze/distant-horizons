@@ -19,6 +19,17 @@
 
 package com.seibel.distanthorizons.fabric.mixins.client;
 
+#if MC_VER >= MC_26_3_0
+import net.minecraft.world.entity.Entity;
+import org.spongepowered.asm.mixin.Mixin;
+
+@Mixin(Entity.class)
+public class MixinLightTexture
+{
+	// lightmap capture is disabled on 26.3 until the renderpearl port (stage 5) lands
+}
+#else
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingApi;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
@@ -127,3 +138,5 @@ public class MixinLightTexture
 	
 	
 }
+
+#endif

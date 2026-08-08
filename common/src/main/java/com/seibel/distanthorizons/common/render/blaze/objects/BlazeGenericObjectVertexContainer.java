@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.blaze.objects;
 
+#if MC_VER < MC_26_3_0
+
 #if MC_VER <= MC_1_21_10
 public class BlazeGenericObjectVertexContainer {}
 
@@ -296,4 +298,5 @@ public class BlazeGenericObjectVertexContainer implements IDhGenericObjectVertex
 	
 	
 }
+#endif
 #endif

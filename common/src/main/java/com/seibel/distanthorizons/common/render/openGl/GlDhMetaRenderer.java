@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.rendering.EDhApiRenderPass;
 import com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiFramebuffer;
 import com.seibel.distanthorizons.api.interfaces.override.rendering.IDhApiShaderProgram;
@@ -541,3 +543,4 @@ public class GlDhMetaRenderer implements IDhMetaRenderer
 	
 	
 }
+#endif

@@ -100,6 +100,8 @@ public class VersionConstants implements IVersionConstants
 			return "26.1.2";
 		#elif MC_VER == MC_26_2_0
 			return "26.2";
+		#elif MC_VER == MC_26_3_0
+			return "26.3";
 		#else
 			ERROR MC version constant missing
 		#endif
@@ -111,8 +113,10 @@ public class VersionConstants implements IVersionConstants
 	{
 		#if MC_VER <= MC_1_21_11
 		return EDhApiRenderingEngine.OPEN_GL;
-		#else
+		#elif MC_VER < MC_26_3_0
 		return EDhApiRenderingEngine.BLAZE_3D;
+		#else
+		return EDhApiRenderingEngine.STUB;
 		#endif
 	}
 	

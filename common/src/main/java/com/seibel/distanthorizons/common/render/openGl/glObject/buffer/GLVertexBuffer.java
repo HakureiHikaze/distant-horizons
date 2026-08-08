@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.buffer;
 
+#if MC_VER < MC_26_3_0
+
 import java.nio.ByteBuffer;
 
 import com.seibel.distanthorizons.common.render.openGl.glObject.GLProxy;
@@ -195,3 +197,4 @@ public class GLVertexBuffer extends GLBuffer implements IVertexBufferWrapper
 	
 	
 }
+#endif

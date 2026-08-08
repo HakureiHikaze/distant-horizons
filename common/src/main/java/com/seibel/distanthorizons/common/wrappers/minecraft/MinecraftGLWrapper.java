@@ -19,6 +19,15 @@
 
 package com.seibel.distanthorizons.common.wrappers.minecraft;
 
+#if MC_VER >= MC_26_3_0
+public class MinecraftGLWrapper
+{
+	public static final MinecraftGLWrapper INSTANCE = new MinecraftGLWrapper();
+	// OpenGL state management is obsolete under renderpearl (26.3);
+	// INSTANCE is kept so LightMapWrapper's static field still initializes.
+}
+#else
+
 #if MC_VER <= MC_1_12_2
 import net.minecraft.client.renderer.GlStateManager;
 #elif MC_VER < MC_1_21_5
@@ -351,3 +360,5 @@ public class MinecraftGLWrapper
 	
 	
 }
+
+#endif

@@ -19,7 +19,7 @@
 
 package com.seibel.distanthorizons.fabric.wrappers.modAccessor;
 
-#if MC_VER >= MC_1_19_4
+#if MC_VER >= MC_1_19_4 && MC_VER < MC_26_3_0
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IIrisAccessor;
 
@@ -41,6 +41,28 @@ public class IrisAccessor implements IIrisAccessor
 	
 	@Override
 	public boolean isRenderingShadowPass() { return IrisApi.getInstance().isRenderingShadowPass(); }
+	
+}
+
+#elif MC_VER >= MC_26_3_0
+
+import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IIrisAccessor;
+import com.seibel.distanthorizons.core.logging.DhLogger;
+import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
+
+public class IrisAccessor implements IIrisAccessor
+{
+	private static final DhLogger LOGGER = new DhLoggerBuilder().name("IrisAccessor").build();
+	
+	public IrisAccessor()
+	{
+		LOGGER.warn("Iris 26.3 accessor is a no-op stub until stage 5; shader pack state will report disabled.");
+	}
+	
+	// Iris 26.3 accessor pending (stage 5); stub keeps the mod compiling without Iris on the classpath
+	@Override public String getModName() { return "iris"; }
+	@Override public boolean isShaderPackInUse() { return false; }
+	@Override public boolean isRenderingShadowPass() { return false; }
 	
 }
 

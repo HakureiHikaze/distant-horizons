@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.blaze.apply;
 
+#if MC_VER < MC_26_3_0
+
 #if MC_VER <= MC_1_21_10
 public class BlazeDhCopyRenderer {}
 
@@ -141,4 +143,5 @@ public class BlazeDhCopyRenderer
 	
 	
 }
+#endif
 #endif

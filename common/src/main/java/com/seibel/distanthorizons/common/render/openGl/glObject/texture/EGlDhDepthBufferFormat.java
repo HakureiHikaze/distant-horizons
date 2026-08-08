@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.glObject.texture;
 
+#if MC_VER < MC_26_3_0
+
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL30C;
 import org.lwjgl.opengl.GL43C;
@@ -112,3 +114,4 @@ public enum EGlDhDepthBufferFormat
 	public boolean isCombinedStencil() { return combinedStencil; }
 	
 }
+#endif

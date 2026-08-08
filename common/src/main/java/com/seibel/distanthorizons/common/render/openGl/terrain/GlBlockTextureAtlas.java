@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.terrain;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import com.seibel.distanthorizons.core.dataObjects.render.textures.BlockTextureRegistry;
 import com.seibel.distanthorizons.core.render.AbstractBlockTextureAtlas;
@@ -208,3 +210,4 @@ public class GlBlockTextureAtlas extends AbstractBlockTextureAtlas
 	
 	
 }
+#endif

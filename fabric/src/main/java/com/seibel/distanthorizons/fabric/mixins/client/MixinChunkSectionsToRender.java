@@ -19,13 +19,13 @@
 
 package com.seibel.distanthorizons.fabric.mixins.client;
 
-#if MC_VER < MC_1_21_9
+#if MC_VER < MC_1_21_9 || MC_VER >= MC_26_3_0
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Entity.class)
 public class MixinChunkSectionsToRender
-{ /* rendering before was handled via Fabric API events */ }
+{ /* rendering before was handled via Fabric API events; disabled on 26.3 until the renderpearl port (stage 2) lands */ }
 #else
 	
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;

@@ -1,5 +1,7 @@
 package com.seibel.distanthorizons.common.render.openGl.glObject.texture;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
 import org.joml.Vector2i;
 import org.lwjgl.opengl.GL11C;
@@ -181,3 +183,4 @@ public class GlDhColorTexture
 		
 	}
 }
+#endif

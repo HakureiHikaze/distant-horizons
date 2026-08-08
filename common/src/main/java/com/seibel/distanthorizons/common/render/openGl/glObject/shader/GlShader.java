@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.shader;
 
+#if MC_VER < MC_26_3_0
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -182,3 +184,4 @@ public class GlShader
 	
 	
 }
+#endif

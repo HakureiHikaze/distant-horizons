@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.enums;
 
+#if MC_VER < MC_26_3_0
+
 import static org.lwjgl.opengl.GL46.*;
 
 // Turns GL int enums back to readable strings
@@ -259,3 +261,4 @@ public class GLEnums
 	}
 	
 }
+#endif

@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.blaze.postProcessing;
 
+#if MC_VER < MC_26_3_0
+
 #if MC_VER <= MC_1_21_10
 public class BlazeVanillaFadeRenderer {}
 
@@ -234,4 +236,5 @@ public class BlazeVanillaFadeRenderer implements IDhVanillaFadeRenderer
 	
 	
 }
+#endif
 #endif

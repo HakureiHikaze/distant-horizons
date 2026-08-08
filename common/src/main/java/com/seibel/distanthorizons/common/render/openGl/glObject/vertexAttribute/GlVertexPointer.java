@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.glObject.vertexAttribute;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.coreapi.util.MathUtil;
 import org.lwjgl.opengl.GL33;
 
@@ -70,3 +72,4 @@ public final class GlVertexPointer
 	public static GlVertexPointer addIVec4Pointer(boolean normalized, boolean useInteger) { return new GlVertexPointer(4, GL33.GL_INT, normalized, 16, useInteger); }
 	
 }
+#endif

@@ -19,6 +19,8 @@
 
 package com.seibel.distanthorizons.common.render.openGl.test;
 
+#if MC_VER < MC_26_3_0
+
 import com.seibel.distanthorizons.api.enums.config.EDhApiGpuUploadMethod;
 import com.seibel.distanthorizons.common.render.openGl.postProcessing.apply.GlDhApplyShader;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftGLWrapper;
@@ -144,3 +146,4 @@ public class GlTestTriangleRenderer implements IDhTestTriangleRenderer
 	
 	
 }
+#endif
