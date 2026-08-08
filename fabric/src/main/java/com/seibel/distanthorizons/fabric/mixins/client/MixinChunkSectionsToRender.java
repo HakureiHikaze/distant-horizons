@@ -19,14 +19,14 @@
 
 package com.seibel.distanthorizons.fabric.mixins.client;
 
-#if MC_VER < MC_1_21_9 || MC_VER >= MC_26_3_0
+#if MC_VER < MC_1_21_9
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Entity.class)
 public class MixinChunkSectionsToRender
 { /* rendering before was handled via Fabric API events; disabled on 26.3 until the renderpearl port (stage 2) lands */ }
-#else
+#elif MC_VER < MC_26_3_0
 	
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
@@ -116,6 +116,52 @@ public class MixinChunkSectionsToRender
 	
 	
 	
+}
+
+#else
+
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.textures.GpuSampler;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
+import com.seibel.distanthorizons.common.render.renderpearl.terrain.RpMainRenderPassHolder;
+import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.distanthorizons.core.api.internal.ClientApi;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
+import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(ChunkSectionsToRender.class)
+public class MixinChunkSectionsToRender
+{
+	// needs to fire at HEAD with a lower than normal order (less than 1000)
+	// otherwise it will be canceled by Sodium
+	@Inject(at = @At("HEAD"), method = "renderGroup", order = 800)
+	private void renderDeferredLayer26_3(
+		ChunkSectionLayerGroup group, RenderPass renderPass,
+		GpuSampler sampler, GpuTextureView atlas, boolean renderWireframeTerrain,
+		CallbackInfo ci)
+	{
+		ClientApi.RENDER_STATE.clientLevelWrapper = ClientLevelWrapper.getWrapperIfDifferent(
+			ClientApi.RENDER_STATE.clientLevelWrapper, Minecraft.getInstance().level);
+		
+		if (group == ChunkSectionLayerGroup.OPAQUE)
+		{
+			// D2 方案 A: draw LOD terrain before vanilla chunks so vanilla depth overwrites near terrain
+			RpMainRenderPassHolder.setCurrent(renderPass);
+			try
+			{
+				ClientApi.INSTANCE.renderLods();
+			}
+			finally
+			{
+				RpMainRenderPassHolder.clear();
+			}
+		}
+	}
 }
 
 #endif

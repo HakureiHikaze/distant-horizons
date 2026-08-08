@@ -73,7 +73,7 @@ public class RpLodUniformBufferWrapper extends RpUniformBufferWrapper implements
 				(float) bufferContainer.minCornerBlockPos.getX(),
 				(float) bufferContainer.minCornerBlockPos.getY(),
 				(float) bufferContainer.minCornerBlockPos.getZ())
-			.finishAndUpload();
+			.uploadMapped();
 		
 		this.uploaded = true;
 	}

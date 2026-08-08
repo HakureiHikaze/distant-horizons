@@ -161,6 +161,43 @@ public class RpUniformBufferWrapper implements AutoCloseable
 		encoder.submit();
 	}
 	
+	/**
+	 * Uploads the CPU buffer through a mapped GPU write instead of a command
+	 * encoder. Safe to call while a render pass is open (stage 2 terrain
+	 * uniforms are updated inside {@code renderGroup}).
+	 */
+	public void uploadMapped()
+	{
+		if (this.bufferSize == 0)
+		{
+			return;
+		}
+		
+		if (this.gpuBuffer == null
+			|| this.gpuBuffer.size() < this.bufferSize)
+		{
+			if (this.gpuBuffer != null)
+			{
+				this.gpuBuffer.close();
+			}
+			
+			int usage = GpuBuffer.USAGE_MAP_WRITE | GpuBuffer.USAGE_UNIFORM;
+			this.gpuBuffer = this.device.createBuffer(this::getName, usage, this.bufferSize);
+		}
+		
+		ByteBuffer data = this.cpuBuffer.duplicate();
+		data.position(0);
+		data.limit(this.bufferSize);
+		
+		try (GpuBufferSlice.MappedView mapped = this.gpuBuffer.map(0, this.bufferSize, false, true))
+		{
+			ByteBuffer destination = mapped.data().duplicate();
+			destination.position(0);
+			destination.limit(this.bufferSize);
+			destination.put(data);
+		}
+	}
+	
 	//endregion
 	
 	

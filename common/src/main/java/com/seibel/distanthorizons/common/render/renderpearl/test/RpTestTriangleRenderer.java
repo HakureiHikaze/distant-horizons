@@ -26,6 +26,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.commands.RenderPass;
 import com.mojang.renderpearl.api.commands.GpuFence;
 import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.renderpearl.api.GpuFormat;
@@ -210,7 +211,7 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 	}
 	
 	/** test seam: draws into arbitrary target views without touching Minecraft */
-	void renderToTargets(GpuTextureView colorTexture, GpuTextureView depthTexture)
+	public void renderToTargets(GpuTextureView colorTexture, GpuTextureView depthTexture)
 	{
 		if (!this.enabled)
 		{
@@ -321,6 +322,36 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 			colorTexture.close();
 			depthTexture.close();
 		}
+	}
+	
+	//endregion
+	
+	
+	
+	//===================//
+	// main pass drawing //
+	//===================//
+	//region
+	
+	/**
+	 * FT-2 (stage 2): draws the triangle into Minecraft's active main render
+	 * pass. Init (pipeline compile + VBO upload) must happen outside the pass
+	 * (client tick / offscreen verification), so this only issues draw commands.
+	 */
+	public void drawInto(RenderPass renderPass)
+	{
+		if (!this.enabled || !this.init || this.compiledPipeline == null || this.vboGpuBuffer == null)
+		{
+			return;
+		}
+		
+		// vanilla chunk rendering may leave a scissor rect active; clear it so
+		// the overlay is not clipped (observed: HEAD draw visible, RETURN draw
+		// silently clipped by the stale scissor)
+		renderPass.disableScissor();
+		renderPass.setPipeline(this.compiledPipeline);
+		renderPass.setVertexBuffer(0, this.vboGpuBuffer.slice());
+		renderPass.draw(3, 1, 0, 0);
 	}
 	
 	//endregion

@@ -27,6 +27,11 @@ import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.commands.CommandEncoder;
 import com.mojang.renderpearl.api.device.GpuDevice;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
+import com.seibel.distanthorizons.core.dataObjects.render.bufferBuilding.IndexBufferBuilder;
+import com.seibel.distanthorizons.core.dataObjects.render.bufferBuilding.LodBufferContainer;
+import com.seibel.distanthorizons.core.dataObjects.render.bufferBuilding.LodQuadBuilder;
+import com.seibel.distanthorizons.core.render.RenderThreadTaskHandler;
+import com.seibel.distanthorizons.core.util.objects.pooling.PhantomArrayList.PhantomArrayListCheckout;
 import com.seibel.distanthorizons.core.wrapperInterfaces.render.AbstractDhRenderApiDefinition;
 import com.seibel.distanthorizons.core.wrapperInterfaces.render.objects.IVertexBufferWrapper;
 
@@ -45,6 +50,7 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 	
 	private GpuBuffer vertexGpuBuffer = null;
 	private GpuBuffer indexGpuBuffer = null;
+	private static GpuBuffer GLOBAL_INDEX_GPU_BUFFER = null;
 	
 	private int vertexCount = -1;
 	private int indexCount = -1;
@@ -67,6 +73,41 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 	{
 		this.name = name;
 		this.device = device;
+	}
+	
+	//endregion
+	
+	
+	
+	//==================//
+	// global IBO setup //
+	//==================//
+	//region
+	
+	static
+	{
+		if (isSingleIbo())
+		{
+			// creation must happen on the render thread
+			RenderThreadTaskHandler.INSTANCE.queueRunningOnRenderThread("Global IBO Creation", () ->
+			{
+				try (PhantomArrayListCheckout checkout = LodBufferContainer.ARRAY_LIST_POOL.checkoutByteBuffers(1))
+				{
+					int maxSize = LodQuadBuilder.getMaxBufferByteSize();
+					int maxVertexCount = maxSize / LodQuadBuilder.BYTES_PER_VERTEX;
+					int maxQuadCount = maxVertexCount / 4;
+					ByteBuffer indexBuffer = IndexBufferBuilder.populateBuffer(checkout, 0, maxQuadCount);
+					
+					GpuDevice device = RenderSystem.getDevice();
+					int usage = GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_INDEX;
+					GLOBAL_INDEX_GPU_BUFFER = device.createBuffer(() -> getIndexBufferName(), usage, indexBuffer.capacity());
+					
+					CommandEncoder encoder = device.createCommandEncoder();
+					encoder.writeToBuffer(new GpuBufferSlice(GLOBAL_INDEX_GPU_BUFFER, 0, indexBuffer.capacity()), indexBuffer);
+					encoder.submit();
+				}
+			});
+		}
 	}
 	
 	//endregion
@@ -144,7 +185,7 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 			
 			int byteSize = indexBuffer.limit() - indexBuffer.position();
 			int usage = GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_INDEX;
-			this.indexGpuBuffer = this.device.createBuffer(this::getIndexBufferName, usage, byteSize);
+			this.indexGpuBuffer = this.device.createBuffer(() -> getIndexBufferName(), usage, byteSize);
 			
 			GpuBufferSlice bufferSlice = new GpuBufferSlice(this.indexGpuBuffer, 0, byteSize);
 			CommandEncoder encoder = this.device.createCommandEncoder();
@@ -165,15 +206,30 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 	public String getName() { return this.name; }
 	
 	public GpuBuffer getVertexGpuBuffer() { return this.vertexGpuBuffer; }
-	public GpuBuffer getIndexGpuBuffer() { return this.indexGpuBuffer; }
+	public GpuBuffer getIndexGpuBuffer()
+	{
+		if (this.useSingleIbo())
+		{
+			return GLOBAL_INDEX_GPU_BUFFER;
+		}
+		else
+		{
+			return this.indexGpuBuffer;
+		}
+	}
 	
 	public int getVertexCount() { return this.vertexCount; }
 	public int getIndexCount() { return this.indexCount; }
 	public boolean isUploaded() { return this.uploaded; }
 	
-	private String getIndexBufferName() { return "distantHorizons:LodIndexBuffer"; }
+	private static String getIndexBufferName() { return "distantHorizons:LodIndexBuffer"; }
 	
 	private boolean useSingleIbo()
+	{
+		return isSingleIbo();
+	}
+	
+	private static boolean isSingleIbo()
 	{
 		try
 		{

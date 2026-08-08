@@ -24,6 +24,7 @@ package com.seibel.distanthorizons.common.render.renderpearl;
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingApi;
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingEngine;
 import com.seibel.distanthorizons.common.render.renderpearl.test.RpTestTriangleRenderer;
+import com.seibel.distanthorizons.common.render.renderpearl.terrain.RpDhTerrainRenderer;
 import com.seibel.distanthorizons.common.render.renderpearl.wrappers.buffer.RpVertexBufferWrapper;
 import com.seibel.distanthorizons.common.render.renderpearl.wrappers.uniform.RpLodUniformBufferWrapper;
 import com.seibel.distanthorizons.common.render.stub.StubDhRenderApiDefinition;
@@ -93,6 +94,16 @@ public class RpDhRenderApiDefinition extends AbstractDhRenderApiDefinition
 	@Override
 	public boolean isNativeRenderer() { return false; }
 	
+	@Override
+	public boolean mayRunRenderThreadTasksInsideRenderPass()
+	{
+		// renderpearl forbids command encoders (buffer writes/uploads) while a
+		// RenderPass is open. MixinLevelRenderer.render HEAD flushes DH's queued
+		// render-thread tasks before MC opens the main pass (stage 2, crash fix:
+		// "Close the existing render pass before performing additional commands").
+		return false;
+	}
+	
 	//endregion
 	
 	
@@ -117,7 +128,7 @@ public class RpDhRenderApiDefinition extends AbstractDhRenderApiDefinition
 	//region
 	
 	@Override public IDhMetaRenderer getMetaRenderer() { return this.stub.getMetaRenderer(); }
-	@Override public IDhTerrainRenderer getTerrainRenderer() { return this.stub.getTerrainRenderer(); }
+	@Override public IDhTerrainRenderer getTerrainRenderer() { return RpDhTerrainRenderer.INSTANCE; }
 	@Override public IDhSsaoRenderer getSsaoRenderer() { return this.stub.getSsaoRenderer(); }
 	@Override public IDhFogRenderer getFogRenderer() { return this.stub.getFogRenderer(); }
 	@Override public IDhFarFadeRenderer getFarFadeRenderer() { return this.stub.getFarFadeRenderer(); }

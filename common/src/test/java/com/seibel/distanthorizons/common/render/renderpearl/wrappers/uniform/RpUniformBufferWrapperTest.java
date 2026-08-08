@@ -77,4 +77,23 @@ class RpUniformBufferWrapperTest
 		Assertions.assertEquals(1, device.writeToBufferCount);
 	}
 	
+	@Test
+	void mappedUploadDoesNotUseCommandEncoder()
+	{
+		TestGpuDevice device = new TestGpuDevice();
+		RpUniformBufferWrapper wrapper = new RpUniformBufferWrapper("test", device);
+		
+		wrapper.putVec3f(1.0f, 2.0f, 3.0f);
+		wrapper.putMat4f(new DhApiMat4f());
+		wrapper.uploadMapped();
+		
+		Assertions.assertEquals(1, device.createBufferCount);
+		Assertions.assertEquals(0, device.writeToBufferCount, "mapped upload must not use the command encoder");
+		Assertions.assertTrue((device.createdBuffers.get(0).usage() & com.mojang.renderpearl.api.buffers.GpuBuffer.USAGE_MAP_WRITE) != 0);
+		
+		wrapper.uploadMapped();
+		Assertions.assertEquals(1, device.createBufferCount, "buffer must be reused");
+		Assertions.assertEquals(0, device.writeToBufferCount);
+	}
+	
 }

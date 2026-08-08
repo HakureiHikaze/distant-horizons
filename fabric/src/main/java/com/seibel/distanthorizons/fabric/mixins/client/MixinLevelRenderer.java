@@ -20,13 +20,96 @@
 package com.seibel.distanthorizons.fabric.mixins.client;
 
 #if MC_VER >= MC_26_3_0
-import net.minecraft.world.entity.Entity;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.seibel.distanthorizons.common.render.renderpearl.test.RpTestTriangleRenderer;
+import com.seibel.distanthorizons.common.render.renderpearl.terrain.RpDhTerrainRenderer;
+import com.seibel.distanthorizons.common.render.renderpearl.terrain.RpRenderStateCapture;
+import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftRenderWrapper;
+import com.seibel.distanthorizons.core.logging.DhLogger;
+import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
+import com.seibel.distanthorizons.core.render.RenderThreadTaskHandler;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Entity.class)
+@Mixin(LevelRenderer.class)
 public class MixinLevelRenderer
 {
-	// state capture disabled on 26.3 until the renderpearl port (stage 2) lands
+	@Unique
+	private static final DhLogger LOGGER = new DhLoggerBuilder().name("RpFrame").build();
+	
+	@Inject(at = @At("HEAD"), method = "render")
+	private void captureRenderState26_3(
+		GraphicsResourceAllocator resourceAllocator, boolean renderOutline,
+		CameraRenderState cameraState, GpuBufferSlice terrainFog, Vector4f fogColor,
+		boolean shouldRenderSky, boolean consistentDepthRequired,
+		CallbackInfo ci)
+	{
+		RpRenderStateCapture.capture(
+			cameraState.projectionMatrix,
+			cameraState.viewRotationMatrix,
+			MinecraftRenderWrapper.INSTANCE.getPartialTickTime(),
+			ClientLevelWrapper.getWrapperIfDifferent(
+				com.seibel.distanthorizons.core.api.internal.ClientApi.RENDER_STATE.clientLevelWrapper,
+				Minecraft.getInstance().level));
+		
+		// compile/refresh terrain pipeline outside any render pass
+		RpDhTerrainRenderer.INSTANCE.prepareFrame();
+		
+		// renderpearl forbids command encoders (buffer writes/uploads) while a
+		// RenderPass is open. Flush DH's queued render-thread tasks (VBO/IBO
+		// uploads, buffer closes) here, before MC opens the main pass, so the
+		// per-frame flush inside ClientApi.renderLods() never runs inside the pass.
+		try
+		{
+			RenderThreadTaskHandler.INSTANCE.runRenderThreadTasks();
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Unexpected issue running render thread tasks before the render pass.", e);
+		}
+	}
+	
+	/**
+	 * FT-2 (stage 2): draws the experimental triangle as a screen overlay AFTER
+	 * the world's main render pass has closed (LevelRenderer.render TAIL, before
+	 * post-processing). Direct draws into the main pass are occluded by the
+	 * chunk command buffers (observed at both HEAD and RETURN of renderGroup),
+	 * so a separate pass on the main target is used instead.
+	 */
+	@Inject(at = @At("TAIL"), method = "render")
+	private void drawTestTriangleOverlay26_3(
+		GraphicsResourceAllocator resourceAllocator, boolean renderOutline,
+		CameraRenderState cameraState, GpuBufferSlice terrainFog, Vector4f fogColor,
+		boolean shouldRenderSky, boolean consistentDepthRequired,
+		CallbackInfo ci)
+	{
+		if (!RpTestTriangleRenderer.INSTANCE.isEnabled())
+		{
+			return;
+		}
+		
+		RenderTarget mainTarget = Minecraft.getInstance().gameRenderer.mainRenderTarget();
+		try
+		{
+			RpTestTriangleRenderer.INSTANCE.renderToTargets(
+				mainTarget.getColorTextureView(),
+				mainTarget.getDepthTextureView());
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Failed to draw test triangle overlay.", e);
+		}
+	}
 }
 #else
 

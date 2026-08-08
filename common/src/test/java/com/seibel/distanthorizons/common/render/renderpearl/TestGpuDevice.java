@@ -199,13 +199,20 @@ public class TestGpuDevice implements GpuDevice
 		private final long size;
 		private final int usage;
 		private boolean closed = false;
+		private final ByteBuffer mappedData = ByteBuffer.allocateDirect(512);
 		
 		public TestGpuBuffer(long size, int usage) { this.size = size; this.usage = usage; }
 		
 		@Override public long size() { return this.size; }
 		@Override public int usage() { return this.usage; }
 		@Override public boolean isClosed() { return this.closed; }
-		@Override public GpuBufferSlice.MappedView map(long offset, long length, boolean read, boolean write) { throw new UnsupportedOperationException(); }
+		@Override public GpuBufferSlice.MappedView map(long offset, long length, boolean read, boolean write)
+		{
+			ByteBuffer view = this.mappedData.duplicate();
+			view.position((int) offset);
+			view.limit((int) (offset + length));
+			return new GpuBufferSlice.MappedView(new GpuBufferSlice(this, offset, length), view, () -> { });
+		}
 		@Override public void close() { this.closed = true; }
 	}
 	

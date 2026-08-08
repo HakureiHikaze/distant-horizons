@@ -3,6 +3,7 @@ package com.seibel.distanthorizons.common.wrappers;
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingEngine;
 import com.seibel.distanthorizons.common.render.renderpearl.RpDhRenderApiDefinition;
 import com.seibel.distanthorizons.common.render.renderpearl.test.RpTestTriangleRenderer;
+import com.seibel.distanthorizons.common.render.renderpearl.terrain.RpDhTerrainRenderer;
 import com.seibel.distanthorizons.common.render.stub.StubDhRenderApiDefinition;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.render.EDhRenderDepth;
@@ -33,6 +34,9 @@ class Stage1RenderEngineSelectionTest
 		Assertions.assertTrue(definition instanceof RpDhRenderApiDefinition);
 		Assertions.assertEquals(EDhApiRenderingEngine.RENDERPEARL, definition.getRenderingEngine());
 		Assertions.assertEquals(EDhRenderDepth.REVERSE_Z, definition.getRenderDepth());
+		// renderpearl forbids command encoders inside an open RenderPass:
+		// render-thread tasks are flushed at frame start instead (stage 2 crash fix)
+		Assertions.assertFalse(definition.mayRunRenderThreadTasksInsideRenderPass());
 	}
 	
 	@Test
@@ -42,7 +46,8 @@ class Stage1RenderEngineSelectionTest
 		StubDhRenderApiDefinition stub = new StubDhRenderApiDefinition();
 		
 		Assertions.assertSame(stub.getMetaRenderer(), definition.getMetaRenderer());
-		Assertions.assertSame(stub.getTerrainRenderer(), definition.getTerrainRenderer());
+		// stage 2: terrain renderer is now a real implementation (SA-3 stage-2 switch)
+		Assertions.assertSame(RpDhTerrainRenderer.INSTANCE, definition.getTerrainRenderer());
 		Assertions.assertSame(stub.getSsaoRenderer(), definition.getSsaoRenderer());
 		Assertions.assertSame(stub.getFogRenderer(), definition.getFogRenderer());
 		Assertions.assertSame(stub.getFarFadeRenderer(), definition.getFarFadeRenderer());
