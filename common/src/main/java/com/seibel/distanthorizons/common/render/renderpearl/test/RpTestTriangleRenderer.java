@@ -26,9 +26,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.commands.CommandEncoder;
+import com.mojang.renderpearl.api.commands.GpuFence;
 import com.mojang.renderpearl.api.device.GpuDevice;
+import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.pipeline.CompiledRenderPipeline;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.renderpearl.api.vertex.VertexFormat;
 import com.seibel.distanthorizons.common.render.renderpearl.RpRenderPipelineBuilderWrapper;
@@ -44,6 +47,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.render.renderPass.IDhTe
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import org.joml.Vector4f;
 
 /**
  * Port of {@code BlazeDhTestTriangleRenderer} (26.2): renders a colored
@@ -232,6 +236,86 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 	
 	//endregion
 	
+	
+	
+	//=============//
+	// offscreen verification //
+	//=============//
+	//region
+	
+	/**
+	 * Renders the triangle into an offscreen RGBA texture and reads the pixels
+	 * back for verification (FT-3). Returns a width*height*4 RGBA buffer.
+	 */
+	public ByteBuffer renderOffscreenAndReadback(int width, int height) throws InterruptedException
+	{
+		this.tryInit();
+		
+		GpuDevice gpuDevice = this.device != null ? this.device : RenderSystem.getDevice();
+		int pixelBytes = width * height * 4;
+		
+		GpuTexture colorTexture = gpuDevice.createTexture(
+			() -> "distantHorizons:testTriangleColor", 
+			GpuTexture.USAGE_RENDER_ATTACHMENT | GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_COPY_SRC,
+			GpuFormat.RGBA8_UNORM, width, height, 1, 1);
+		GpuTexture depthTexture = gpuDevice.createTexture(
+			() -> "distantHorizons:testTriangleDepth",
+			GpuTexture.USAGE_RENDER_ATTACHMENT,
+			GpuFormat.D32_FLOAT, width, height, 1, 1);
+		
+		GpuTextureView colorView = gpuDevice.createTextureView(colorTexture);
+		GpuTextureView depthView = gpuDevice.createTextureView(depthTexture);
+		
+		try
+		{
+			// deterministic background so "outside" pixels are verifiable
+			CommandEncoder clearEncoder = gpuDevice.createCommandEncoder();
+			clearEncoder.clearColorTexture(colorTexture, new Vector4f(0.0f, 0.0f, 0.0f, 1.0f));
+			clearEncoder.submit();
+			
+			this.renderToTargets(colorView, depthView);
+			
+			GpuBuffer readbackBuffer = gpuDevice.createBuffer(
+				() -> "distantHorizons:testTriangleReadback",
+				GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_MAP_READ,
+				pixelBytes);
+			
+			CommandEncoder encoder = gpuDevice.createCommandEncoder();
+			GpuFence fence = encoder.createFence();
+			encoder.copyTextureToBuffer(colorTexture, readbackBuffer, 0, () -> { }, 0);
+			encoder.submit();
+			
+			if (!fence.awaitCompletion(5_000_000_000L))
+			{
+				throw new IllegalStateException("Timed out waiting for test triangle texture readback.");
+			}
+			fence.close();
+			
+			try (GpuBufferSlice.MappedView mapped = readbackBuffer.map(0, pixelBytes, true, false))
+			{
+				ByteBuffer result = ByteBuffer.allocate(pixelBytes);
+				ByteBuffer data = mapped.data().duplicate();
+				data.position(0);
+				data.limit(pixelBytes);
+				result.put(data);
+				result.rewind();
+				return result;
+			}
+			finally
+			{
+				readbackBuffer.close();
+			}
+		}
+		finally
+		{
+			colorView.close();
+			depthView.close();
+			colorTexture.close();
+			depthTexture.close();
+		}
+	}
+	
+	//endregion
 	
 	
 }

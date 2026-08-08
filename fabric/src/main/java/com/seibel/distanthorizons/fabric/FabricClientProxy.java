@@ -75,6 +75,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderConte
 
 import com.mojang.blaze3d.platform.InputConstants;
 
+#if MC_VER >= MC_26_3_0
+import com.seibel.distanthorizons.common.render.renderpearl.test.RpTestTriangleRenderer;
+import net.minecraft.client.KeyMapping;
+
+import java.nio.ByteBuffer;
+#endif
+
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -96,6 +103,15 @@ import org.lwjgl.glfw.GLFW;
 public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 {
 	private static final DhLogger LOGGER = new DhLoggerBuilder().build();
+	
+	#if MC_VER >= MC_26_3_0
+	private static final KeyMapping TEST_TRIANGLE_KEY = new KeyMapping(
+		"key.distanthorizons.test_triangle",
+		InputConstants.Type.KEYBOARD,
+		InputConstants.KEY_F6,
+		KeyMapping.Category.DEBUG);
+	private static boolean readbackDone = false;
+	#endif
 	
 	private static final MinecraftClientWrapper MC = MinecraftClientWrapper.INSTANCE;
 	private static final AbstractPluginPacketSender PACKET_SENDER = (AbstractPluginPacketSender) SingletonInjector.INSTANCE.get(IPluginPacketSender.class);
@@ -315,6 +331,13 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		});
 		#endif
 		
+		// automation hook: -Ddh.renderpearl.testTriangle=true enables the triangle at startup
+		if (Boolean.getBoolean("dh.renderpearl.testTriangle"))
+		{
+			RpTestTriangleRenderer.INSTANCE.setEnabled(true);
+			LOGGER.info("RenderPearl test triangle auto-enabled via system property.");
+		}
+		
 		//endregion
 		
 		
@@ -328,11 +351,26 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		// FIXME: Use better hooks so it doesn't trigger key press events in text boxes
 		ClientTickEvents.END_CLIENT_TICK.register(client -> 
 		{
-			// TODO
-			//if (client.player != null && !(Minecraft.getInstance().screen instanceof TitleScreen))
-			//{
-			//	this.onKeyInput();
-			//}
+			#if MC_VER >= MC_26_3_0
+			while (TEST_TRIANGLE_KEY.consumeClick())
+			{
+				boolean enabled = !RpTestTriangleRenderer.INSTANCE.isEnabled();
+				RpTestTriangleRenderer.INSTANCE.setEnabled(enabled);
+				if (enabled)
+				{
+					// each enable re-runs the offscreen verification (FT-5 resource churn)
+					readbackDone = false;
+				}
+				LOGGER.info("RenderPearl test triangle " + (enabled ? "enabled" : "disabled") + ".");
+			}
+			
+			// offscreen verification runs outside any active render pass (FT-3)
+			if (RpTestTriangleRenderer.INSTANCE.isEnabled() && !readbackDone)
+			{
+				readbackDone = true;
+				this.runTriangleReadbackVerification();
+			}
+			#endif
 		});
 		
 		//endregion
@@ -410,5 +448,41 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		// Update the set
 		this.previouslyPressKeyCodes = currentKeyDown;
 	}
+	
+	#if MC_VER >= MC_26_3_0
+	private void runTriangleReadbackVerification()
+	{
+		try
+		{
+			ByteBuffer pixels = RpTestTriangleRenderer.INSTANCE.renderOffscreenAndReadback(64, 64);
+			this.logPixel("center", pixels, 32, 32, 64);
+			this.logPixel("corner_red", pixels, 8, 56, 64);
+			this.logPixel("corner_green", pixels, 56, 56, 64);
+			this.logPixel("corner_blue", pixels, 32, 8, 64);
+			this.logPixel("outside", pixels, 2, 2, 64);
+			// NDC vertex candidates (texture row 0 may be top or bottom)
+			this.logPixel("vtx_a1", pixels, 16, 16, 64);
+			this.logPixel("vtx_a2", pixels, 48, 16, 64);
+			this.logPixel("vtx_a3", pixels, 32, 48, 64);
+			this.logPixel("vtx_b1", pixels, 16, 48, 64);
+			this.logPixel("vtx_b2", pixels, 48, 48, 64);
+			this.logPixel("vtx_b3", pixels, 32, 16, 64);
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("RenderPearl test triangle readback failed.", e);
+		}
+	}
+	
+	private void logPixel(String label, ByteBuffer rgba, int x, int y, int width)
+	{
+		int index = (y * width + x) * 4;
+		int r = rgba.get(index) & 0xFF;
+		int g = rgba.get(index + 1) & 0xFF;
+		int b = rgba.get(index + 2) & 0xFF;
+		int a = rgba.get(index + 3) & 0xFF;
+		LOGGER.info("Test triangle pixel [" + label + "] @(" + x + "," + y + ") = RGBA(" + r + "," + g + "," + b + "," + a + ")");
+	}
+	#endif
 	
 }

@@ -1,0 +1,7 @@
+[03:10:33] [Test worker/WARN]: Rendering engine not enabled (waiting for the renderpearl port): the Stub engine is active and no LODs will be rendered.
+[03:10:33] [Test worker/WARN]: Rendering engine not enabled (waiting for the renderpearl port): the Stub engine is active and no LODs will be rendered.
+[03:10:33] [Test worker/FATAL]: No [AbstractDhRenderApiDefinition] concrete implementation found for the value: [OPEN_GL].
+[03:10:33] [Test worker/FATAL]: No [AbstractDhRenderApiDefinition] concrete implementation found for the value: [BLAZE_3D].
+[03:10:33] [Test worker/INFO]: RenderPearl engine selected; experimental triangle available, main world rendering still disabled.
+[03:10:33] [Test worker/INFO]: RenderPearl engine selected; experimental triangle available, main world rendering still disabled.
+[03:10:33] [Test worker/INFO]: RenderPearl engine selected; experimental triangle available, main world rendering still disabled.
