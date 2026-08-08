@@ -60,7 +60,6 @@ import java.util.List;
  */
 public class StubDhRenderApiDefinition extends AbstractDhRenderApiDefinition
 {
-	private static final DhLogger LOGGER = new DhLoggerBuilder().name("StubEngine").build();
 	private static final StubDebugWireframeRenderer DEBUG_WIREFRAME_RENDERER = new StubDebugWireframeRenderer();
 	
 	private EDhApiRenderingApi renderApi = null;
@@ -106,7 +105,7 @@ public class StubDhRenderApiDefinition extends AbstractDhRenderApiDefinition
 	
 	public StubDhRenderApiDefinition()
 	{
-		LOGGER.info("Rendering engine not enabled (waiting for the renderpearl port): the Stub engine is active and no LODs will be rendered.");
+		// no-op; the "rendering engine not enabled" status is logged by DependencySetup when STUB is selected
 	}
 	
 	//endregion

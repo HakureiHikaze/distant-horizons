@@ -523,8 +523,8 @@ public abstract class AbstractModInitializer
 		Config.Client.Advanced.Graphics.Experimental.renderingEngine.setMcVersionOverrideValue(EDhApiRenderingEngine.OPEN_GL);
 		#elif MC_VER < MC_26_3_0
 		#else
-		// 26.3 and newer: no render engine has been ported yet, force the no-op Stub engine
-		Config.Client.Advanced.Graphics.Experimental.renderingEngine.setMcVersionOverrideValue(EDhApiRenderingEngine.STUB);
+		// 26.3 and newer: the default engine is resolved by VersionConstants (STUB for stage 1);
+		// RENDERPEARL is user-selectable while the port is in progress.
 		#endif
 	}
 	

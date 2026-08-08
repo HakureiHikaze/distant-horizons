@@ -25,6 +25,9 @@ import com.seibel.distanthorizons.api.interfaces.render.IDhApiCustomRenderObject
 import com.seibel.distanthorizons.common.render.blaze.BlazeDhRenderApiDefinition;
 import com.seibel.distanthorizons.common.render.openGl.GlDhRenderApiDefinition;
 #endif
+#if MC_VER >= MC_26_3_0
+import com.seibel.distanthorizons.common.render.renderpearl.RpDhRenderApiDefinition;
+#endif
 import com.seibel.distanthorizons.common.render.stub.StubDhRenderApiDefinition;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.api.enums.config.EDhApiRenderingApi;
@@ -151,8 +154,15 @@ public class DependencySetup
 		AbstractDhRenderApiDefinition renderDefinition;
 		if (renderingApiEnum == EDhApiRenderingEngine.STUB)
 		{
+			LOGGER.warn("Rendering engine not enabled (waiting for the renderpearl port): the Stub engine is active and no LODs will be rendered.");
 			renderDefinition = new StubDhRenderApiDefinition();
 		}
+		#if MC_VER >= MC_26_3_0
+		else if (renderingApiEnum == EDhApiRenderingEngine.RENDERPEARL)
+		{
+			renderDefinition = new RpDhRenderApiDefinition();
+		}
+		#endif
 		#if MC_VER < MC_26_3_0
 		else if (renderingApiEnum == EDhApiRenderingEngine.OPEN_GL)
 		{

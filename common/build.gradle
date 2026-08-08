@@ -2,6 +2,11 @@ plugins {
     id 'dh-loader'
 }
 
+// Unit tests need the same Minecraft/renderpearl compile surface as main
+configurations {
+    testImplementation.extendsFrom(compileOnly)
+}
+
 // JUnit for common's standalone unit tests (no Minecraft client required)
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
@@ -13,6 +18,14 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+// Unit tests need the same Minecraft/renderpearl surface as main
+sourceSets {
+    test {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
 }
 
 // Mojang removed ARM LWJGL natives, which causes CI to fail for 1.12.2. Note: this means we cannot build on ARM CPUs right now.
