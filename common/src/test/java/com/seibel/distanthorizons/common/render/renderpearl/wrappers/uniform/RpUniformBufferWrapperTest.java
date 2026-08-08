@@ -58,4 +58,23 @@ class RpUniformBufferWrapperTest
 		Assertions.assertEquals(0, device.writeToBufferCount);
 	}
 	
+	@Test
+	void bufferGrowthBeyondInitialCapacity()
+	{
+		// audit F2: the CPU buffer must grow beyond the initial 256 bytes
+		TestGpuDevice device = new TestGpuDevice();
+		RpUniformBufferWrapper wrapper = new RpUniformBufferWrapper("test", device);
+		
+		for (int i = 0; i < 20; i++)
+		{
+			wrapper.putMat4f(new DhApiMat4f());
+		}
+		
+		Assertions.assertEquals(20 * 64, wrapper.getBufferSize());
+		wrapper.finishAndUpload();
+		Assertions.assertEquals(1, device.createBufferCount);
+		Assertions.assertTrue(device.createdBuffers.get(0).size() >= wrapper.getBufferSize());
+		Assertions.assertEquals(1, device.writeToBufferCount);
+	}
+	
 }

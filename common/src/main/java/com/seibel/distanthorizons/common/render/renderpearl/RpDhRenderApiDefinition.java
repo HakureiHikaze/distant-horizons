@@ -67,6 +67,10 @@ public class RpDhRenderApiDefinition extends AbstractDhRenderApiDefinition
 	//region
 	
 	@Override
+	/**
+	 * Contract (audit F10): resolves the Minecraft rendering API lazily; only
+	 * call after Minecraft's renderer is initialized (client binding path).
+	 */
 	public String getEngineName() { return "RenderPearl: " + this.getRenderApi(); }
 	
 	@Override

@@ -11,11 +11,19 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.render.objects.IDhGener
 import com.seibel.distanthorizons.core.wrapperInterfaces.render.renderPass.IDhMetaRenderer;
 import com.seibel.distanthorizons.core.wrapperInterfaces.render.renderPass.IDhTestTriangleRenderer;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 /** UT-7: RENDERPEARL selection + SA-3 stub consistency across all modules. */
 class Stage1RenderEngineSelectionTest
 {
+	@AfterEach
+	void clearInjector()
+	{
+		// audit F9: avoid leaking bindings into other tests
+		SingletonInjector.INSTANCE.clear();
+	}
+	
 	@Test
 	void renderpearlEngineIsSelectable()
 	{

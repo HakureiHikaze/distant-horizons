@@ -67,8 +67,11 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 	
 	private boolean init = false;
 	private RenderPipeline pipeline;
+	private PipelineCache pipelineCache;
 	private CompiledRenderPipeline compiledPipeline;
 	private GpuBuffer vboGpuBuffer;
+	private RpTextureViewWrapper mcColorView;
+	private RpTextureViewWrapper mcDepthView;
 	
 	
 	
@@ -140,14 +143,18 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 		this.pipeline = pipelineBuilder.build();
 		
 		// SA-7 / 7B: DH-owned pipeline cache with embedded shader sources
-		PipelineCache pipelineCache = new PipelineCache(gpuDevice, RpShaderSource.INSTANCE);
-		this.compiledPipeline = pipelineCache.get(this.pipeline);
+		this.pipelineCache = new PipelineCache(gpuDevice, RpShaderSource.INSTANCE);
+		this.compiledPipeline = this.pipelineCache.get(this.pipeline);
 		if (this.compiledPipeline == null)
 		{
 			throw new IllegalStateException("Failed to compile test triangle pipeline [" + this.pipeline.getLocation() + "].");
 		}
 		
 		this.uploadVertexData(gpuDevice);
+		
+		// cached view wrappers are reused across frames (audit F8)
+		this.mcColorView = new RpTextureViewWrapper(gpuDevice);
+		this.mcDepthView = new RpTextureViewWrapper(gpuDevice);
 	}
 	
 	private void uploadVertexData(GpuDevice gpuDevice)
@@ -196,15 +203,10 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 		
 		GpuDevice gpuDevice = this.device != null ? this.device : RenderSystem.getDevice();
 		
-		RpTextureViewWrapper colorViewWrapper = new RpTextureViewWrapper(gpuDevice);
-		RpTextureViewWrapper depthViewWrapper = new RpTextureViewWrapper(gpuDevice);
-		colorViewWrapper.tryWrap(MinecraftRenderWrapper.INSTANCE.getRenderTarget().getColorTexture());
-		depthViewWrapper.tryWrap(MinecraftRenderWrapper.INSTANCE.getRenderTarget().getDepthTexture());
+		this.mcColorView.tryWrap(MinecraftRenderWrapper.INSTANCE.getRenderTarget().getColorTexture());
+		this.mcDepthView.tryWrap(MinecraftRenderWrapper.INSTANCE.getRenderTarget().getDepthTexture());
 		
-		this.renderToTargets(colorViewWrapper.getTextureView(), depthViewWrapper.getTextureView());
-		
-		colorViewWrapper.close();
-		depthViewWrapper.close();
+		this.renderToTargets(this.mcColorView.getTextureView(), this.mcDepthView.getTextureView());
 	}
 	
 	/** test seam: draws into arbitrary target views without touching Minecraft */
@@ -280,16 +282,22 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 				GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_MAP_READ,
 				pixelBytes);
 			
-			CommandEncoder encoder = gpuDevice.createCommandEncoder();
-			GpuFence fence = encoder.createFence();
-			encoder.copyTextureToBuffer(colorTexture, readbackBuffer, 0, () -> { }, 0);
-			encoder.submit();
-			
-			if (!fence.awaitCompletion(5_000_000_000L))
+			// audit F3: retry the fence wait; a single transient timeout must not fail the verification
+			boolean copied = false;
+			for (int attempt = 0; attempt < 3 && !copied; attempt++)
 			{
-				throw new IllegalStateException("Timed out waiting for test triangle texture readback.");
+				CommandEncoder encoder = gpuDevice.createCommandEncoder();
+				GpuFence fence = encoder.createFence();
+				encoder.copyTextureToBuffer(colorTexture, readbackBuffer, 0, () -> { }, 0);
+				encoder.submit();
+				copied = fence.awaitCompletion(5_000_000_000L);
+				fence.close();
 			}
-			fence.close();
+			
+			if (!copied)
+			{
+				throw new IllegalStateException("Timed out waiting for test triangle texture readback after 3 attempts.");
+			}
 			
 			try (GpuBufferSlice.MappedView mapped = readbackBuffer.map(0, pixelBytes, true, false))
 			{
@@ -313,6 +321,26 @@ public class RpTestTriangleRenderer implements IDhTestTriangleRenderer
 			colorTexture.close();
 			depthTexture.close();
 		}
+	}
+	
+	//endregion
+	
+	
+	
+	//========//
+	// close  //
+	//========//
+	//region
+	
+	/** lifecycle cleanup; stage 2 will wire this to device close / shader reload (audit F5) */
+	public void close()
+	{
+		if (this.mcColorView != null) { this.mcColorView.close(); this.mcColorView = null; }
+		if (this.mcDepthView != null) { this.mcDepthView.close(); this.mcDepthView = null; }
+		if (this.compiledPipeline != null) { this.compiledPipeline.close(); this.compiledPipeline = null; }
+		if (this.pipelineCache != null) { this.pipelineCache.close(); this.pipelineCache = null; }
+		if (this.vboGpuBuffer != null) { this.vboGpuBuffer.close(); this.vboGpuBuffer = null; }
+		this.init = false;
 	}
 	
 	//endregion

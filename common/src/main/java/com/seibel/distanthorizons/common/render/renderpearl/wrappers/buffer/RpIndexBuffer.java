@@ -68,6 +68,10 @@ public class RpIndexBuffer implements AutoCloseable
 	//========//
 	//region
 	
+	/**
+	 * Contract (audit F7): the caller must pass a buffer positioned at 0 with
+	 * limit == byte length.
+	 */
 	public void uploadIndexBuffer(ByteBuffer indexBuffer, int indexCount)
 	{
 		if (this.indexGpuBuffer == null

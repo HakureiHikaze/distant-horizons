@@ -80,6 +80,27 @@ class RpRenderPipelineBuilderWrapperTest
 	}
 	
 	@Test
+	void missingOptionsThrowExplicitExceptions()
+	{
+		// audit F6: build() must not NPE on missing options
+		RpRenderPipelineBuilderWrapper noDepth = new RpRenderPipelineBuilderWrapper();
+		noDepth.withName("ut1_nodepth");
+		noDepth.withVertexShader("test/ut1_vert");
+		noDepth.withFragmentShader("test/ut1_frag");
+		noDepth.withVertexFormat(RpVertexFormatUtil.createScreenPosColorFormat());
+		noDepth.withVertexMode(RpRenderPipelineBuilderWrapper.EDhVertexMode.TRIANGLES);
+		Assertions.assertThrows(IllegalStateException.class, noDepth::build);
+		
+		RpRenderPipelineBuilderWrapper noMode = new RpRenderPipelineBuilderWrapper();
+		noMode.withName("ut1_nomode");
+		noMode.withVertexShader("test/ut1_vert");
+		noMode.withFragmentShader("test/ut1_frag");
+		noMode.withDepthTest(RpRenderPipelineBuilderWrapper.EDhDepthTest.NONE);
+		noMode.withVertexFormat(RpVertexFormatUtil.createScreenPosColorFormat());
+		Assertions.assertThrows(IllegalStateException.class, noMode::build);
+	}
+	
+	@Test
 	void depthTestMappingIsExhaustive()
 	{
 		Assertions.assertEquals(CompareOp.ALWAYS_PASS, this.buildDepthTest(RpRenderPipelineBuilderWrapper.EDhDepthTest.NONE));

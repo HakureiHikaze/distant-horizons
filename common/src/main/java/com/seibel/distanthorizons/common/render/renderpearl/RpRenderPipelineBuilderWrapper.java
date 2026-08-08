@@ -201,6 +201,20 @@ public class RpRenderPipelineBuilderWrapper
 	
 	public RenderPipeline build() throws UnsupportedOperationException
 	{
+		// audit F6: explicit errors instead of NPEs for missing options
+		if (this.depthTest == null)
+		{
+			throw new IllegalStateException("No depth test defined; call withDepthTest(...) before build().");
+		}
+		if (this.vertexMode == null)
+		{
+			throw new IllegalStateException("No vertex mode defined; call withVertexMode(...) before build().");
+		}
+		if (this.vertexFormat == null)
+		{
+			throw new IllegalStateException("No vertex format defined; call withVertexFormat(...) before build().");
+		}
+		
 		// depth/color
 		{
 			CompareOp compareOp;

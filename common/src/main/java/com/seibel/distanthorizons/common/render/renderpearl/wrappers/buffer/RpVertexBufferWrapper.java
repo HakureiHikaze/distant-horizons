@@ -78,6 +78,10 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 	//========//
 	//region
 	
+	/**
+	 * Contract (audit F7): the caller must pass a buffer positioned at 0 with
+	 * limit == byte length; the wrapper uploads exactly limit-position bytes.
+	 */
 	@Override
 	public void uploadVertexBuffer(ByteBuffer vertexBuffer, int vertexCount)
 	{
@@ -111,6 +115,10 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 		}
 	}
 	
+	/**
+	 * Contract (audit F7): the caller must pass a buffer positioned at 0 with
+	 * limit == byte length.
+	 */
 	@Override
 	public void uploadIndexBuffer(ByteBuffer indexBuffer, int vertexCount)
 	{
