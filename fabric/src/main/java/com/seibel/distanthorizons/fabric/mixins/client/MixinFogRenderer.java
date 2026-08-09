@@ -20,13 +20,36 @@
 package com.seibel.distanthorizons.fabric.mixins.client;
 
 #if MC_VER >= MC_26_3_0
-import net.minecraft.world.entity.Entity;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.seibel.distanthorizons.core.config.Config;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(Entity.class)
+/**
+ * 26.3: lets DH's "Should Minecraft's fog render?" config (
+ * {@code Config.Client.Advanced.Graphics.Fog.enableVanillaFog}) actually take
+ * effect. When disabled, MC's own {@code FogRenderer.fogEnabled} flag is forced
+ * off so {@code getBuffer} returns the built-in empty fog UBO (fog color
+ * alpha = 0), which removes the vanilla fog covering far LOD terrain.
+ */
+@Mixin(FogRenderer.class)
 public class MixinFogRenderer
 {
-	// fog capture is disabled on 26.3 until the renderpearl port (stage 4/6) lands
+	@Shadow
+	private static boolean fogEnabled;
+	
+	@Inject(at = @At("HEAD"), method = "getBuffer")
+	private void dh$applyVanillaFogSetting(FogRenderer.FogMode mode, CallbackInfoReturnable<GpuBufferSlice> cir)
+	{
+		if (!Config.Client.Advanced.Graphics.Fog.enableVanillaFog.get())
+		{
+			fogEnabled = false;
+		}
+	}
 }
 #else
 

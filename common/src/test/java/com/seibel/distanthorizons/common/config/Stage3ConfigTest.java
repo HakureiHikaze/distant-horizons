@@ -19,6 +19,7 @@ class Stage3ConfigTest
 		Config.Client.Advanced.Graphics.Quality.lodRenderDistanceLevel.setWithoutSaving(LodRenderDistanceLevel.DEFAULT_LEVEL);
 		Config.Client.Advanced.Graphics.Quality.lodChunkRenderDistanceRadius.setWithoutSaving(256);
 		Config.Client.Advanced.Debugging.testTriangle.setWithoutSaving(false);
+		Config.Client.Advanced.Graphics.Fog.enableVanillaFog.setWithoutSaving(false);
 	}
 	
 	@Test // UT-3-1
@@ -53,5 +54,13 @@ class Stage3ConfigTest
 		Assertions.assertFalse(Config.Client.Advanced.Debugging.testTriangle.get());
 		Config.Client.Advanced.Debugging.testTriangle.setWithoutSaving(true);
 		Assertions.assertTrue(Config.Client.Advanced.Debugging.testTriangle.get());
+	}
+	
+	@Test // stage 3 fog toggle: DH disables vanilla fog by default
+	void vanillaFogToggleDefaultsOffAndCanBeSet()
+	{
+		Assertions.assertFalse(Config.Client.Advanced.Graphics.Fog.enableVanillaFog.get());
+		Config.Client.Advanced.Graphics.Fog.enableVanillaFog.setWithoutSaving(true);
+		Assertions.assertTrue(Config.Client.Advanced.Graphics.Fog.enableVanillaFog.get());
 	}
 }

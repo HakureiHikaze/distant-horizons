@@ -8,6 +8,7 @@ import com.mojang.renderpearl.api.textures.GpuTextureView;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
@@ -43,6 +44,14 @@ class MixinSignatureTest
 		java.lang.reflect.Field layoutField = OptionsScreen.class.getDeclaredField("layout");
 		layoutField.setAccessible(true);
 		Assertions.assertEquals(HeaderAndFooterLayout.class, layoutField.getType());
+	}
+	
+	/** stage 3: the vanilla-fog mixin target keeps its field/method contract. */
+	@Test
+	void fogRendererContractHolds() throws Exception
+	{
+		Assertions.assertNotNull(FogRenderer.class.getMethod("getBuffer", FogRenderer.FogMode.class));
+		Assertions.assertNotNull(FogRenderer.class.getDeclaredField("fogEnabled"));
 	}
 	
 	/**
