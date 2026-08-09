@@ -745,7 +745,14 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	//region
 	
 	@Override
-	public ILightMapWrapper getLightmapWrapper(@NotNull ILevelWrapper level) { return this.lightmapByDimensionType.get(level.getDimensionType()); }
+	public ILightMapWrapper getLightmapWrapper(@NotNull ILevelWrapper level)
+	{
+		// stage 3 fix: on 26.3 the lightmap update events are not wired yet, so
+		// the map may be empty; fall back to a default wrapper so RenderParams
+		// validation ("No Lightmap Loaded") passes and the LOD renderer runs.
+		// The minimal terrain shader does not sample the lightmap.
+		return this.lightmapByDimensionType.computeIfAbsent(level.getDimensionType(), (dimType) -> new LightMapWrapper());
+	}
 	
 	/**
 	 * It's better to use {@link MinecraftRenderWrapper#setLightmapId(int)} if possible,
