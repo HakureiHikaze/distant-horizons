@@ -73,6 +73,9 @@ public class RpLodUniformBufferWrapper extends RpUniformBufferWrapper implements
 				(float) bufferContainer.minCornerBlockPos.getX(),
 				(float) bufferContainer.minCornerBlockPos.getY(),
 				(float) bufferContainer.minCornerBlockPos.getZ())
+			// Std140: a trailing vec3 occupies a 16-byte slot; pad with a dummy
+			// float so the UBO is never smaller than the shader block (audit F8)
+			.putFloat(0.0f)
 			.uploadMapped();
 		
 		this.uploaded = true;

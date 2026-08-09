@@ -48,6 +48,8 @@ public class TestGpuDevice implements GpuDevice
 	public int writeToBufferCount = 0;
 	public int createRenderPassCount = 0;
 	public int drawCount = 0;
+	public int drawIndexedCount = 0;
+	public int setIndexBufferCount = 0;
 	public boolean closed = false;
 	
 	public final List<GpuBuffer> createdBuffers = new ArrayList<>();
@@ -179,8 +181,8 @@ public class TestGpuDevice implements GpuDevice
 		@Override public void enableScissor(int x, int y, int width, int height) { }
 		@Override public void disableScissor() { }
 		@Override public void setVertexBuffer(int slot, GpuBufferSlice vertexBuffer) { }
-		@Override public void setIndexBuffer(GpuBuffer indexBuffer, IndexType indexType) { }
-		@Override public void drawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) { }
+		@Override public void setIndexBuffer(GpuBuffer indexBuffer, IndexType indexType) { this.device.setIndexBufferCount++; }
+		@Override public void drawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) { this.device.drawIndexedCount++; }
 		@Override public void multiDrawIndexed(IntBuffer drawParameters, int instanceCount, int firstInstance, int drawCount) { }
 		@Override public void multiDrawIndexed(PointerBuffer firstIndexOffsets, IntBuffer indexCounts, IntBuffer vertexOffsets, int drawCount) { }
 		@Override public void drawIndexedIndirect(GpuBufferSlice commands, int drawCount) { }

@@ -42,6 +42,7 @@ import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
@@ -76,6 +77,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelTerrainRenderConte
 import com.mojang.blaze3d.platform.InputConstants;
 
 #if MC_VER >= MC_26_3_0
+import com.seibel.distanthorizons.common.render.renderpearl.RpDhRenderApiDefinition;
 import com.seibel.distanthorizons.common.render.renderpearl.test.RpTestTriangleRenderer;
 import net.minecraft.client.KeyMapping;
 
@@ -337,6 +339,11 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 			RpTestTriangleRenderer.INSTANCE.setEnabled(true);
 			LOGGER.info("RenderPearl test triangle auto-enabled via system property.");
 		}
+		
+		#if MC_VER >= MC_26_3_0
+		// audit F5: release renderpearl GPU resources on client shutdown
+		ClientLifecycleEvents.CLIENT_STOPPING.register(client -> RpDhRenderApiDefinition.closeRenderers());
+		#endif
 		
 		//endregion
 		

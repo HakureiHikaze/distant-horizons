@@ -62,7 +62,7 @@ public class RpTerrainShaderSources implements ShaderSource
 		{
 		    bool uIsWhiteWorld;
 		    float uWorldYOffset;
-		    float uMircoOffset;
+		    float uMicroOffset;
 		    float uEarthRadius;
 		    vec3 uCameraPos;
 		    mat4 uCombinedMatrix;

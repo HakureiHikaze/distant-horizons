@@ -51,6 +51,7 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 	private GpuBuffer vertexGpuBuffer = null;
 	private GpuBuffer indexGpuBuffer = null;
 	private static GpuBuffer GLOBAL_INDEX_GPU_BUFFER = null;
+	private static boolean GLOBAL_INDEX_BUFFER_CREATION_QUEUED = false;
 	
 	private int vertexCount = -1;
 	private int indexCount = -1;
@@ -83,32 +84,6 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 	// global IBO setup //
 	//==================//
 	//region
-	
-	static
-	{
-		if (isSingleIbo())
-		{
-			// creation must happen on the render thread
-			RenderThreadTaskHandler.INSTANCE.queueRunningOnRenderThread("Global IBO Creation", () ->
-			{
-				try (PhantomArrayListCheckout checkout = LodBufferContainer.ARRAY_LIST_POOL.checkoutByteBuffers(1))
-				{
-					int maxSize = LodQuadBuilder.getMaxBufferByteSize();
-					int maxVertexCount = maxSize / LodQuadBuilder.BYTES_PER_VERTEX;
-					int maxQuadCount = maxVertexCount / 4;
-					ByteBuffer indexBuffer = IndexBufferBuilder.populateBuffer(checkout, 0, maxQuadCount);
-					
-					GpuDevice device = RenderSystem.getDevice();
-					int usage = GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_INDEX;
-					GLOBAL_INDEX_GPU_BUFFER = device.createBuffer(() -> getIndexBufferName(), usage, indexBuffer.capacity());
-					
-					CommandEncoder encoder = device.createCommandEncoder();
-					encoder.writeToBuffer(new GpuBufferSlice(GLOBAL_INDEX_GPU_BUFFER, 0, indexBuffer.capacity()), indexBuffer);
-					encoder.submit();
-				}
-			});
-		}
-	}
 	
 	//endregion
 	
@@ -210,12 +185,67 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 	{
 		if (this.useSingleIbo())
 		{
+			ensureGlobalIndexBufferQueued();
 			return GLOBAL_INDEX_GPU_BUFFER;
 		}
 		else
 		{
 			return this.indexGpuBuffer;
 		}
+	}
+	
+	/**
+	 * Queues the global index buffer creation on the render thread exactly once.
+	 * Explicit lazy initialization (audit F3): the creation must not depend on
+	 * class-load timing or on the injector already being bound, and it must run
+	 * outside any open render pass (the queued task is flushed at frame start by
+	 * {@code MixinLevelRenderer.render} HEAD).
+	 */
+	public static synchronized void ensureGlobalIndexBufferQueued()
+	{
+		if (GLOBAL_INDEX_BUFFER_CREATION_QUEUED
+			|| GLOBAL_INDEX_GPU_BUFFER != null
+			|| !isSingleIbo())
+		{
+			return;
+		}
+		GLOBAL_INDEX_BUFFER_CREATION_QUEUED = true;
+		
+		// creation must happen on the render thread
+		RenderThreadTaskHandler.INSTANCE.queueRunningOnRenderThread("Global IBO Creation", () ->
+		{
+			GLOBAL_INDEX_GPU_BUFFER = createGlobalIndexBuffer(getDevice());
+		});
+	}
+	
+	/**
+	 * Creates the global index buffer for the maximum quad capacity.
+	 * Package-private test seam (UT-2-6): the queued task calls this; unit
+	 * tests may call it directly with a fake device.
+	 */
+	static GpuBuffer createGlobalIndexBuffer(GpuDevice device)
+	{
+		try (PhantomArrayListCheckout checkout = LodBufferContainer.ARRAY_LIST_POOL.checkoutByteBuffers(1))
+		{
+			int maxSize = LodQuadBuilder.getMaxBufferByteSize();
+			int maxVertexCount = maxSize / LodQuadBuilder.BYTES_PER_VERTEX;
+			int maxQuadCount = maxVertexCount / 4;
+			ByteBuffer indexBuffer = IndexBufferBuilder.populateBuffer(checkout, 0, maxQuadCount);
+			
+			int usage = GpuBuffer.USAGE_COPY_DST | GpuBuffer.USAGE_INDEX;
+			GpuBuffer gpuBuffer = device.createBuffer(() -> getIndexBufferName(), usage, indexBuffer.capacity());
+			
+			CommandEncoder encoder = device.createCommandEncoder();
+			encoder.writeToBuffer(new GpuBufferSlice(gpuBuffer, 0, indexBuffer.capacity()), indexBuffer);
+			encoder.submit();
+			return gpuBuffer;
+		}
+	}
+	
+	/** device resolution used by the global IBO creation task */
+	private static GpuDevice getDevice()
+	{
+		return RenderSystem.getDevice();
 	}
 	
 	public int getVertexCount() { return this.vertexCount; }
@@ -229,7 +259,7 @@ public class RpVertexBufferWrapper implements IVertexBufferWrapper
 		return isSingleIbo();
 	}
 	
-	private static boolean isSingleIbo()
+	static boolean isSingleIbo()
 	{
 		try
 		{

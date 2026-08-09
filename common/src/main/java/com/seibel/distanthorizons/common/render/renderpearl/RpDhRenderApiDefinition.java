@@ -139,6 +139,21 @@ public class RpDhRenderApiDefinition extends AbstractDhRenderApiDefinition
 	//endregion
 	
 	
+	//===========//
+	// lifecycle //
+	//===========//
+	//region
+	
+	/** releases all renderpearl renderer GPU resources (audit F5); wired to client shutdown */
+	public static void closeRenderers()
+	{
+		RpDhTerrainRenderer.INSTANCE.close();
+		RpTestTriangleRenderer.INSTANCE.close();
+	}
+	
+	//endregion
+	
+	
 	
 	//===========//
 	// factories //

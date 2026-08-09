@@ -78,6 +78,7 @@ public class RpUniformBufferWrapper implements AutoCloseable
 	
 	public RpUniformBufferWrapper putFloat(float value)
 	{
+		this.ensureBuilder();
 		this.ensureCapacity(4);
 		this.builder.putFloat(value);
 		this.updateSize();
@@ -86,6 +87,7 @@ public class RpUniformBufferWrapper implements AutoCloseable
 	
 	public RpUniformBufferWrapper putInt(int value)
 	{
+		this.ensureBuilder();
 		this.ensureCapacity(4);
 		this.builder.putInt(value);
 		this.updateSize();
@@ -94,6 +96,7 @@ public class RpUniformBufferWrapper implements AutoCloseable
 	
 	public RpUniformBufferWrapper putVec2f(float x, float y)
 	{
+		this.ensureBuilder();
 		this.ensureCapacity(8);
 		this.builder.putVec2(x, y);
 		this.updateSize();
@@ -102,6 +105,7 @@ public class RpUniformBufferWrapper implements AutoCloseable
 	
 	public RpUniformBufferWrapper putVec3f(float x, float y, float z)
 	{
+		this.ensureBuilder();
 		this.ensureCapacity(16);
 		this.builder.putVec3(x, y, z);
 		this.updateSize();
@@ -110,6 +114,7 @@ public class RpUniformBufferWrapper implements AutoCloseable
 	
 	public RpUniformBufferWrapper putVec4f(float x, float y, float z, float w)
 	{
+		this.ensureBuilder();
 		this.ensureCapacity(16);
 		this.builder.putVec4(x, y, z, w);
 		this.updateSize();
@@ -118,6 +123,7 @@ public class RpUniformBufferWrapper implements AutoCloseable
 	
 	public RpUniformBufferWrapper putMat4f(DhApiMat4f matrix)
 	{
+		this.ensureBuilder();
 		this.ensureCapacity(64);
 		this.builder.putMat4f(new Matrix4f().set(matrix.getValuesAsArray()));
 		this.updateSize();
@@ -159,6 +165,8 @@ public class RpUniformBufferWrapper implements AutoCloseable
 		CommandEncoder encoder = this.device.createCommandEncoder();
 		encoder.writeToBuffer(this.gpuBuffer.slice(), data);
 		encoder.submit();
+		
+		this.resetBuilder();
 	}
 	
 	/**
@@ -196,6 +204,8 @@ public class RpUniformBufferWrapper implements AutoCloseable
 			destination.limit(this.bufferSize);
 			destination.put(data);
 		}
+		
+		this.resetBuilder();
 	}
 	
 	//endregion
@@ -219,12 +229,41 @@ public class RpUniformBufferWrapper implements AutoCloseable
 		this.cpuBuffer.flip();
 		newBuffer.put(this.cpuBuffer);
 		this.cpuBuffer = newBuffer;
-		this.builder = Std140Builder.intoBuffer(this.cpuBuffer);
+		if (this.builder != null)
+		{
+			this.builder = Std140Builder.intoBuffer(this.cpuBuffer);
+		}
 	}
 	
 	private void updateSize()
 	{
 		this.bufferSize = this.cpuBuffer.position();
+	}
+	
+	/**
+	 * Lazily (re)creates the Std140 builder after an upload reset (audit F1).
+	 * The builder must write from the CPU buffer's current position, so it is
+	 * recreated whenever the buffer position was reset to 0.
+	 */
+	private void ensureBuilder()
+	{
+		if (this.builder == null)
+		{
+			this.builder = Std140Builder.intoBuffer(this.cpuBuffer);
+		}
+	}
+	
+	/**
+	 * Resets the write cursor after a successful upload so the next frame's
+	 * {@code put*} calls overwrite the buffer from offset 0. Without this the
+	 * shared UBO keeps growing every frame and the shader keeps reading the
+	 * first frame's data (audit F1, P0).
+	 */
+	private void resetBuilder()
+	{
+		this.cpuBuffer.position(0);
+		this.bufferSize = 0;
+		this.builder = null;
 	}
 	
 	//endregion
