@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(Entity.class)
 public class MixinFogRenderer
 {
-	// fog capture is disabled on 26.3 until the renderpearl port (stage 3/5) lands
+	// fog capture is disabled on 26.3 until the renderpearl port (stage 4/6) lands
 }
 #else
 

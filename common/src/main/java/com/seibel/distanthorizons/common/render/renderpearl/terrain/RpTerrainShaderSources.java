@@ -30,8 +30,8 @@ import java.util.Map;
 /**
  * Stage 2 (SA-7/7B): embedded minimal LOD terrain shaders. No fog/fade/texture
  * atlas in this stage; the fragment shader outputs the vertex color so LOD
- * terrain is visible as flat-colored geometry. Stage 3 adds fog/fade and
- * stage 5 adds lightmap/atlas sampling.
+ * terrain is visible as flat-colored geometry. Stage 4 adds fog/fade and
+ * stage 6 adds lightmap/atlas sampling.
  */
 public class RpTerrainShaderSources implements ShaderSource
 {

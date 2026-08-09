@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(Entity.class)
 public class MixinLightTexture
 {
-	// lightmap capture is disabled on 26.3 until the renderpearl port (stage 5) lands
+	// lightmap capture is disabled on 26.3 until the renderpearl port (stage 6) lands
 }
 #else
 

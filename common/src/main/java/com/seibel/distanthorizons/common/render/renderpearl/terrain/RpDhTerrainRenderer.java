@@ -155,7 +155,7 @@ public class RpDhTerrainRenderer implements IDhTerrainRenderer
 	{
 		if (!opaquePass)
 		{
-			// transparent LOD rendering lands in stage 4
+			// transparent LOD rendering lands in stage 5
 			return;
 		}
 		

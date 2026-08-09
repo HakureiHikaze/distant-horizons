@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  * Stage 1 (decision SA-7 / 7B): DH-owned {@link ShaderSource} serving embedded
- * minimal GLSL sources. The formal shader resource system lands in stage 3,
+ * minimal GLSL sources. The formal shader resource system lands in stage 4,
  * at which point this can be replaced by ShaderManager-backed loading.
  */
 public class RpShaderSource implements ShaderSource

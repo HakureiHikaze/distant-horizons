@@ -56,10 +56,10 @@ public class IrisAccessor implements IIrisAccessor
 	
 	public IrisAccessor()
 	{
-		LOGGER.warn("Iris 26.3 accessor is a no-op stub until stage 5; shader pack state will report disabled.");
+		LOGGER.warn("Iris 26.3 accessor is a no-op stub until stage 6; shader pack state will report disabled.");
 	}
 	
-	// Iris 26.3 accessor pending (stage 5); stub keeps the mod compiling without Iris on the classpath
+	// Iris 26.3 accessor pending (stage 6); stub keeps the mod compiling without Iris on the classpath
 	@Override public String getModName() { return "iris"; }
 	@Override public boolean isShaderPackInUse() { return false; }
 	@Override public boolean isRenderingShadowPass() { return false; }

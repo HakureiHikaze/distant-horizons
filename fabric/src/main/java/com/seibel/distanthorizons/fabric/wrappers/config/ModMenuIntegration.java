@@ -39,7 +39,7 @@ public class ModMenuIntegration implements ModMenuApi
 
 #else
 
-/** ModMenu 26.3 integration pending (stage 5); stub keeps the entrypoint resolvable. */
+/** ModMenu 26.3 integration pending (stage 6); stub keeps the entrypoint resolvable. */
 public class ModMenuIntegration
 {
 	
