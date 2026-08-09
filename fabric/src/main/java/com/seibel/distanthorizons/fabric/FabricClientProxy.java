@@ -25,6 +25,7 @@ import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
+import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.logging.DhLogger;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 
@@ -333,12 +334,17 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 		});
 		#endif
 		
-		// automation hook: -Ddh.renderpearl.testTriangle=true enables the triangle at startup
+		// stage 3 (SA-3-8): the test triangle is now a config entry; the legacy
+		// system property and the F6 key stay compatible and write back to it
+		boolean triangleEnabled = Config.Client.Advanced.Debugging.testTriangle.get();
 		if (Boolean.getBoolean("dh.renderpearl.testTriangle"))
 		{
-			RpTestTriangleRenderer.INSTANCE.setEnabled(true);
+			triangleEnabled = true;
+			Config.Client.Advanced.Debugging.testTriangle.set(true);
 			LOGGER.info("RenderPearl test triangle auto-enabled via system property.");
 		}
+		RpTestTriangleRenderer.INSTANCE.setEnabled(triangleEnabled);
+		Config.Client.Advanced.Debugging.testTriangle.addValueChangeListener(RpTestTriangleRenderer.INSTANCE::setEnabled);
 		
 		#if MC_VER >= MC_26_3_0
 		// audit F5: release renderpearl GPU resources on client shutdown
@@ -363,6 +369,7 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 			{
 				boolean enabled = !RpTestTriangleRenderer.INSTANCE.isEnabled();
 				RpTestTriangleRenderer.INSTANCE.setEnabled(enabled);
+				Config.Client.Advanced.Debugging.testTriangle.set(enabled);
 				if (enabled)
 				{
 					// each enable re-runs the offscreen verification (FT-5 resource churn)
@@ -377,6 +384,7 @@ public class FabricClientProxy implements AbstractModInitializer.IEventProxy
 				readbackDone = true;
 				this.runTriangleReadbackVerification();
 			}
+			
 			#endif
 		});
 		

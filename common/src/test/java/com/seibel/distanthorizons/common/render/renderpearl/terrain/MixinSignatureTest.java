@@ -5,10 +5,14 @@ import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.commands.RenderPass;
 import com.mojang.renderpearl.api.textures.GpuSampler;
 import com.mojang.renderpearl.api.textures.GpuTextureView;
+import net.minecraft.client.Options;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayerGroup;
 import net.minecraft.client.renderer.chunk.ChunkSectionsToRender;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.gui.screens.options.OptionsScreen;
 import org.joml.Vector4f;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,20 @@ class MixinSignatureTest
 	{
 		Assertions.assertNotNull(ChunkSectionsToRender.class);
 		Assertions.assertNotNull(LevelRenderer.class);
+		Assertions.assertNotNull(OptionsScreen.class);
+	}
+	
+	/** UT-3-5: the stage 3 entry mixin target keeps its layout contract. */
+	@Test
+	void optionsScreenLayoutContractHolds() throws Exception
+	{
+		java.lang.reflect.Constructor<OptionsScreen> constructor =
+			OptionsScreen.class.getConstructor(Screen.class, Options.class);
+		Assertions.assertNotNull(constructor);
+		
+		java.lang.reflect.Field layoutField = OptionsScreen.class.getDeclaredField("layout");
+		layoutField.setAccessible(true);
+		Assertions.assertEquals(HeaderAndFooterLayout.class, layoutField.getType());
 	}
 	
 	/**
